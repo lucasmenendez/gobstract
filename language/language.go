@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-var langs_dir = "github.com/lucasmenendez/gobstract/language/data"
+var langs_dir = "./language/data"
 
 type Language struct {
 	Label string

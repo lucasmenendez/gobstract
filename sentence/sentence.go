@@ -9,17 +9,43 @@ type Sentence struct {
 	Text string
 	Lang *language.Language
 	Tokens []string
+	Score float64
+	Order int
 }
 
-func NewSentence(text string, lang *language.Language) Sentence {
+type Sentences []*Sentence
+
+func (sentences Sentences) SortScore() {
+	for i := 0; i < len(sentences); i++ {
+		for j:= i+1; j < len(sentences); j++ {
+			if sentences[j].Score > sentences[i].Score {
+				sentences[i], sentences[j] = sentences[j], sentences[i]
+			}
+		}
+	}
+}
+
+func (sentences Sentences) SortOrder() {
+	for i := 0; i < len(sentences); i++ {
+		for j:= i+1; j < len(sentences); j++ {
+			if sentences[j].Order < sentences[i].Order {
+				sentences[i], sentences[j] = sentences[j], sentences[i]
+			}
+		}
+	}
+}
+
+func NewSentence(text string, order int, lang *language.Language) *Sentence {
 	var tokens []string
-	var sentence Sentence = Sentence{text, lang, tokens}
+	var score float64 = 0.0
+	var sentence *Sentence = &Sentence{text, lang, tokens, score, order}
+
 	sentence.tokenize()
 	return sentence
 }
 
 func (sentence *Sentence) tokenize() {
-	var rgx_clean = regexp.MustCompile(`\[|\]|\(|\)|\{|\}`)
+	var rgx_clean = regexp.MustCompile(`\[|\]|\(|\)|\{|\}|“|”|«|»`)
 	var cleaned string = rgx_clean.ReplaceAllString(sentence.Text, "")
 
 	var rgx_word = regexp.MustCompile(` `)
