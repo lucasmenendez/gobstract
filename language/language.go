@@ -43,7 +43,7 @@ func (language *Language) getStopwords() error {
 
 	var raw_stopwords []byte
 	if raw_stopwords, err = ioutil.ReadFile(location); err != nil {
-		panic(err)
+		return err
 	}
 
 	var rgx_stopwords *regexp.Regexp = regexp.MustCompile(`\n`)
@@ -51,23 +51,23 @@ func (language *Language) getStopwords() error {
 	return nil
 }
 
-func GetLanguage(label string) *Language {
+func GetLanguage(label string) (*Language, error) {
 	var stopwords []string
 	var language *Language = &Language{label, stopwords}
 
 	var err error
 	var supported bool
 	if supported, err = language.isSupported(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if !supported {
-		panic("Language not supported")
+		return nil, errors.New("Language not supported")
 	}
 
 	if err = language.getStopwords(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return language
+	return language, nil
 }

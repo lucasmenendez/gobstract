@@ -17,10 +17,15 @@ type Gobstract struct {
 	Lang *language.Language
 }
 
-func NewAbstract(text string, lang_label string) (*Gobstract) {
+func NewAbstract(text string, lang_label string) (*Gobstract, nil) {
 	var paragraphs []sentence.Sentences
 	var sentences []string
-	var lang *language.Language = language.GetLanguage(lang_label)
+
+	var err error
+	var lang *language.Language
+	if lang, err = language.GetLanguage(lang_label); err != nil {
+		return nil, err
+	}
 
 	var gobstract *Gobstract = &Gobstract{text, paragraphs, sentences, lang}
 	gobstract.splitText()
@@ -30,7 +35,7 @@ func NewAbstract(text string, lang_label string) (*Gobstract) {
 
 	gobstract.selectHighlights()
 
-	return gobstract
+	return gobstract, nil
 }
 
 func (gobstract *Gobstract) splitText() {

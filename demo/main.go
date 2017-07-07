@@ -24,7 +24,10 @@ func main() {
 	}
 
 	var input string = string(input_raw)
-	var abstract *gobstract.Gobstract = gobstract.NewAbstract(input, "en")
+	var abstract *gobstract.Gobstract
+	if abstract, err = gobstract.NewAbstract(input, "en"); err != nil {
+		panic(err)
+	}
 
 	var output float32
 	for _, sentence := range abstract.Sentences {

@@ -55,7 +55,7 @@ func (scorer *Scorer) keywords() {
 		}
 	}
 
-	var sum_avg, count_avg, max_avg int
+	var sum_avg, count_avg int
 	var weights map[string]int = make(map[string]int, len(tokens))
 	for i, raw_token := range tokens {
 		var token string = strings.TrimSpace(raw_token)
@@ -70,9 +70,6 @@ func (scorer *Scorer) keywords() {
 			if occurrences > 0 {
 				sum_avg += occurrences
 				count_avg++
-				if occurrences > max_avg {
-					max_avg = occurrences
-				}
 			}
 			weights[token] = occurrences
 		}
