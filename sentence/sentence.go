@@ -1,7 +1,6 @@
 package sentence
 
 import (
-	"errors"
 	"regexp"
 	"strings"
 	"github.com/lucasmenendez/gobstract/language"

@@ -17,7 +17,7 @@ type Gobstract struct {
 	Lang *language.Language
 }
 
-func NewAbstract(text string, lang_label string) (*Gobstract, nil) {
+func NewAbstract(text string, lang_label string) (*Gobstract, error) {
 	var paragraphs []sentence.Sentences
 	var sentences []string
 
