@@ -1,12 +1,14 @@
 package sentence
 
 import (
+	"strings"
 	"regexp"
 	"github.com/lucasmenendez/gobstract/language"
 )
 
 type Sentence struct {
 	Text string
+	raw_text string
 	Lang *language.Language
 	Tokens []string
 	Score float64
@@ -36,9 +38,10 @@ func (sentences Sentences) SortOrder() {
 }
 
 func NewSentence(text string, order int, lang *language.Language) *Sentence {
+	var raw_text string = strings.ToLower(text)
 	var tokens []string
 	var score float64 = 0.0
-	var sentence *Sentence = &Sentence{text, lang, tokens, score, order}
+	var sentence *Sentence = &Sentence{text, raw_text, lang, tokens, score, order}
 
 	sentence.tokenize()
 	return sentence

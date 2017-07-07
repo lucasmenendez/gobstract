@@ -24,13 +24,15 @@ func main() {
 	}
 
 	var input string = string(input_raw)
-	var abstract *gobstract.Gobstract
-	if abstract, err = gobstract.NewAbstract(input, "en"); err != nil {
-		panic(err)
-	}
+	var abstract *gobstract.Gobstract = gobstract.NewAbstract(input, "en")
 
-
+	var output float32
 	for _, sentence := range abstract.Sentences {
+		output += float32(len(sentence))
 		fmt.Println(sentence)
 	}
+
+	var total float32 = float32(len(input))
+	var percent float32 = output/total*100
+	fmt.Printf("\nDeleted %g%% of content. \n", (100 - percent))
 }
