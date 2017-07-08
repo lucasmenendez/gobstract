@@ -2,14 +2,15 @@ package scorer
 
 import (
 	"strings"
+	"github.com/lucasmenendez/gobstract/paragraph"
 	"github.com/lucasmenendez/gobstract/sentence"
 )
 
 type Scorer struct {
-	paragraphs []sentence.Sentences
+	paragraphs *paragraph.Paragraphs
 }
 
-func NewScorer(paragraphs []sentence.Sentences) *Scorer {
+func NewScorer(paragraphs *paragraph.Paragraphs) *Scorer {
 	return &Scorer{paragraphs}
 }
 
@@ -19,15 +20,18 @@ func (scorer *Scorer) Calc() {
 }
 
 func (scorer *Scorer) neighbours() {
+	var paragraphs paragraph.Paragraphs = *scorer.paragraphs
+	
 	var dimension int = 0
-	for _, paragraph := range scorer.paragraphs {
-		dimension += len(paragraph)
+	for _, paragraph := range paragraphs {
+		dimension += len(*paragraph.Sentences)
 	}
 
-	for _, paragraph := range scorer.paragraphs {
-		for i, s1 := range paragraph {
+	for _, paragraph := range paragraphs {
+		var sentences = *paragraph.Sentences
+		for i, s1 := range sentences {
 			var score float64 = 0.0
-			for j, s2 := range paragraph {
+			for j, s2 := range sentences {
 				if i != j {
 					var coincidences, average float64
 					for _, t1 := range s1.Tokens {
@@ -44,13 +48,19 @@ func (scorer *Scorer) neighbours() {
 
 			s1.Score = score
 		}
+		paragraph.Sentences = &sentences
 	}
+
+	scorer.paragraphs = &paragraphs
 }
 
 func (scorer *Scorer) keywords() {
+	var paragraphs paragraph.Paragraphs = *scorer.paragraphs
+
 	var tokens []string
-	for _, paragraph := range scorer.paragraphs {
-		for _, sentence := range paragraph {
+	for _, paragraph := range paragraphs {
+		var sentences sentence.Sentences = *paragraph.Sentences
+		for _, sentence := range sentences {
 			tokens = append(tokens, sentence.Tokens...)
 		}
 	}
@@ -86,8 +96,9 @@ func (scorer *Scorer) keywords() {
 			}
 		}
 
-		for _, paragraph := range scorer.paragraphs {
-			for _, sentence := range paragraph {
+		for _, paragraph := range paragraphs {
+			var sentences = *paragraph.Sentences
+			for _, sentence := range sentences {
 				var score float64
 				for _, keyword := range keywords {
 					var weight int = weights[keyword]
@@ -100,6 +111,43 @@ func (scorer *Scorer) keywords() {
 				}
 				sentence.Score += score
 			}
+			paragraph.Sentences = &sentences
 		}
 	}
+	scorer.paragraphs = &paragraphs
+}
+
+func (scorer *Scorer) SelectHighlights() []string {
+	var paragraphs paragraph.Paragraphs = *scorer.paragraphs
+	var sentences_scored sentence.Sentences
+
+	for _, paragraph := range paragraphs {
+		var sentences = *paragraph.Sentences
+		for _, sentence := range sentences {
+			if sentence.Score > 0.0 {
+				sentences_scored = append(sentences_scored, sentence)
+			}
+		}
+
+	}
+	sentences_scored.SortScore()
+
+	var count int
+	var sum_avg float64
+	for _, sentence := range sentences_scored {
+		sum_avg += sentence.Score
+		count++
+	}
+
+	sentences_scored.SortOrder()
+
+	var highlights []string
+	var average float64 = (sum_avg/float64(count))
+	for _, sentence := range sentences_scored {
+		if sentence.Score > average {
+			highlights = append(highlights, sentence.Text)
+		}
+	}
+
+	return highlights
 }
