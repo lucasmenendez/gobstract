@@ -47,20 +47,34 @@ func NewSentence(text string, order int, lang *language.Language) *Sentence {
 	return sentence
 }
 
+func (sentence *Sentence) HasToken(needle string) bool {
+	for _, token := range sentence.Tokens {
+		if needle == token {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (sentence *Sentence) tokenize() {
-	var rgx_clean = regexp.MustCompile(`\[|\]|\(|\)|\{|\}|“|”|«|»`)
+	var rgx_clean = regexp.MustCompile(`\[|\]|\(|\)|\{|\}|“|”|«|»|,|´|’|-|_|—`)
 	var cleaned string = rgx_clean.ReplaceAllString(sentence.Text, "")
 
 	var rgx_word = regexp.MustCompile(` `)
 	var tokens []string = rgx_word.Split(cleaned, -1)
 
 	OUTTER:
-	for _, token := range tokens {
-		for _, stopword := range sentence.Lang.Stopwords {
-			if token == stopword {
-				continue OUTTER
+	for _, raw_token := range tokens {
+		var token string = strings.TrimSpace(raw_token)
+		if len(token) > 0 {
+			var lower_token string = strings.ToLower(token)
+			for _, stopword := range sentence.Lang.Stopwords {
+				if lower_token == stopword {
+					continue OUTTER
+				}
 			}
+			sentence.Tokens = append(sentence.Tokens, lower_token)
 		}
-		sentence.Tokens = append(sentence.Tokens, token)
 	}
 }
