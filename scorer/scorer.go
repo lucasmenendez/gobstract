@@ -28,7 +28,7 @@ func (scorer *Scorer) addScores(scores []*Score) {
 	var rang float64 = (max_value - min_value)
 	for _, score := range scores {
 		var value float64 = (score.value/rang*0.5)
-		score.sentence.Score += value	
+		score.sentence.Score += value
 	}
 }
 
@@ -99,13 +99,13 @@ func (scorer *Scorer) keywords() {
 	}
 
 	var keywords []string
-	var limit int = ((max - min)/2) 
+	var limit int = ((max - min)/2)
 	for token, weight := range weights {
 		if weight >= limit {
 			keywords = append(keywords, token)
 		}
 	}
-	
+
 	var scores []*Score
 	for _, sentence := range scorer.sentences {
 		var value float64
@@ -130,7 +130,7 @@ func (scorer *Scorer) length() {
 
 	var scores []*Score
 	for _, sentence := range scorer.sentences {
-		var value float64 = (float64(len(sentence.Text)) / max) 
+		var value float64 = (float64(len(sentence.Text)) / max)
 		scores = append(scores, &Score{sentence, value})
 	}
 	scorer.addScores(scores)
@@ -154,7 +154,7 @@ func (scorer *Scorer) titles() {
 		}
 
 		if occurrences > 0 {
-			var value float64 = float64(occurrences / len(keywords)) 
+			var value float64 = float64(occurrences / len(keywords))
 			scores = append(scores, &Score{sentence, value})
 		}
 	}
