@@ -1,7 +1,6 @@
 package scorer
 
 import (
-	"fmt"
 	"github.com/lucasmenendez/gobstract/paragraph"
 	"github.com/lucasmenendez/gobstract/sentence"
 )
@@ -48,6 +47,7 @@ func (scorer *Scorer) Calc() {
 	scorer.neighbours()
 	scorer.keywords()
 	scorer.length()
+	scorer.titles()
 }
 
 func (scorer *Scorer) neighbours() {
@@ -76,11 +76,7 @@ func (scorer *Scorer) neighbours() {
 func (scorer *Scorer) keywords() {
 	var tokens []string
 	for _, sentence := range scorer.sentences {
-		for _, token := range sentence.Tokens {
-			if len(token) >= 3 {
-				tokens = append(tokens, token)
-			}
-		}
+		tokens = append(tokens, sentence.Tokens...)
 	}
 
 	var max, min int = 0, len(tokens)
@@ -95,7 +91,8 @@ func (scorer *Scorer) keywords() {
 
 		if occurrences > max {
 			max = occurrences
-		} else if occurrences < min {
+		}
+		if occurrences < min {
 			min = occurrences
 		}
 		weights[token] = occurrences
@@ -139,10 +136,29 @@ func (scorer *Scorer) length() {
 	scorer.addScores(scores)
 }
 
-func (scorer *Scorer) title() {
+func (scorer *Scorer) titles() {
+	var keywords []string
 	for _, paragraph := range *scorer.paragraphs {
-		fmt.Println(paragraph.Title.Tokens)
+		if paragraph.Title != nil {
+			keywords = append(keywords, paragraph.Title.Tokens...)
+		}
 	}
+
+	var scores []*Score
+	for _, sentence := range scorer.sentences {
+		var	occurrences int
+		for _, keyword := range keywords {
+			if sentence.HasToken(keyword) {
+				occurrences++
+			}
+		}
+
+		if occurrences > 0 {
+			var value float64 = float64(occurrences / len(keywords)) 
+			scores = append(scores, &Score{sentence, value})
+		}
+	}
+	scorer.addScores(scores)
 }
 
 func (scorer *Scorer) SelectHighlights() []string {
@@ -158,11 +174,11 @@ func (scorer *Scorer) SelectHighlights() []string {
 	for _, sentence := range sentences_scored {
 		if sentence.Score > max {
 			max = sentence.Score
-		} else if sentence.Score < min {
+		}
+		if sentence.Score < min {
 			min = sentence.Score
 		}
 	}
-
 	sentences_scored.SortOrder()
 
 	var highlights []string

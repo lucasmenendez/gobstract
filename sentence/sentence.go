@@ -67,7 +67,7 @@ func (sentence *Sentence) tokenize() {
 	OUTTER:
 	for _, raw_token := range tokens {
 		var token string = strings.TrimSpace(raw_token)
-		if len(token) > 0 {
+		if len(token) > 3 {
 			var lower_token string = strings.ToLower(token)
 			for _, stopword := range sentence.Lang.Stopwords {
 				if lower_token == stopword {
