@@ -6,6 +6,7 @@ import (
 
 	"github.com/lucasmenendez/gobstract/language"
 	"github.com/lucasmenendez/gobstract/sentence"
+	"github.com/lucasmenendez/gobstract/tokenizer"
 )
 
 var title_min int = 5
@@ -26,41 +27,42 @@ func SplitText(text string, lang *language.Language) *Paragraphs {
 	var reader *strings.Reader = strings.NewReader(text)
 	var scanner *bufio.Scanner = bufio.NewScanner(reader)
 
-	var order int = 0
+	var order int = 1
 	for scanner.Scan() {
 		var title *sentence.Sentence
 		var sentences *sentence.Sentences
 
-		var line string = scanner.Text()
-		if len(line) <= title_min {
-			continue	
-		} else if title_min < len(line) && len(line) <= title_max {
-			var content string = strings.TrimSpace(line)
-			title = sentence.NewSentence(content, order, lang)
-			order++
+		var text string = scanner.Text()
+		var line string = strings.TrimSpace(text)
+		if len(line) > 0 {
+			if len(line) <= title_min {
+				continue
+			} else if title_min < len(line) && len(line) <= title_max {
+				title = sentence.NewSentence(line, order, lang)
 
-			if scanner.Scan() {
-				line = scanner.Text()
-			} else {
-				break
+				if scanner.Scan() {
+					line = scanner.Text()
+				} else {
+					break
+				}
 			}
+
+			var paragraph *Paragraph = &Paragraph{title, line, sentences, lang}
+			paragraph.split(&order)
+
+			paragraphs = append(paragraphs, paragraph)
 		}
-
-		var paragraph *Paragraph = &Paragraph{title, line, sentences, lang}
-		paragraph.split(&order)
-
-		paragraphs = append(paragraphs, paragraph)
 	}
 
 	return &paragraphs
 }
 
 func (paragraph *Paragraph) split(order *int) {
+	var raw_lines []string = tokenizer.SplitSentences(paragraph.Line)
 	var sentences sentence.Sentences
-
-	var raw_line []string = strings.Split(paragraph.Line, ". ")
-	for _, raw_sentence := range raw_line {
+	for _, raw_sentence := range raw_lines {
 		var content string = strings.TrimSpace(raw_sentence)
+
 		sentences = append(sentences, sentence.NewSentence(content, *order, paragraph.Lang))
 		*order++
 	}

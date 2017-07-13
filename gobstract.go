@@ -6,13 +6,11 @@ import (
 	"github.com/lucasmenendez/gobstract/scorer"
 )
 
-var min_length int = 100
-
 type Gobstract struct {
-	Text string
+	Text       string
 	Paragraphs *paragraph.Paragraphs
-	Sentences []string
-	Lang *language.Language
+	Sentences  []string
+	Lang       *language.Language
 }
 
 func NewAbstract(text string, lang_label string) (*Gobstract, error) {
@@ -33,4 +31,3 @@ func NewAbstract(text string, lang_label string) (*Gobstract, error) {
 	gobstract.Sentences = scorer.SelectHighlights()
 	return gobstract, nil
 }
-

@@ -1,9 +1,9 @@
 package sentence
 
 import (
-	"regexp"
 	"strings"
 	"github.com/lucasmenendez/gobstract/language"
+	"github.com/lucasmenendez/gobstract/tokenizer"
 )
 
 type Sentence struct {
@@ -58,23 +58,15 @@ func (sentence *Sentence) HasToken(needle string) bool {
 }
 
 func (sentence *Sentence) tokenize() {
-	var rgx_clean = regexp.MustCompile(`\[|\]|\(|\)|\{|\}|“|”|«|»|,|´|’|-|_|—`)
-	var cleaned string = rgx_clean.ReplaceAllString(sentence.Text, "")
-
-	var rgx_word = regexp.MustCompile(` `)
-	var tokens []string = rgx_word.Split(cleaned, -1)
+	var tokens []string = tokenizer.SplitWords(sentence.Text)
 
 	OUTTER:
-	for _, raw_token := range tokens {
-		var token string = strings.TrimSpace(raw_token)
-		if len(token) > 3 {
-			var lower_token string = strings.ToLower(token)
-			for _, stopword := range sentence.Lang.Stopwords {
-				if lower_token == stopword {
-					continue OUTTER
-				}
+	for _, token := range tokens {
+		for _, stopword := range sentence.Lang.Stopwords {
+			if token == stopword {
+				continue OUTTER
 			}
-			sentence.Tokens = append(sentence.Tokens, lower_token)
 		}
+		sentence.Tokens = append(sentence.Tokens, token)
 	}
 }

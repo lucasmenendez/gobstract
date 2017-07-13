@@ -37,7 +37,7 @@ func main() {
 	}
 
 	var total float32 = float32(len(input))
-	var percent float32 = float32(output)/total*100.0
-	fmt.Printf("\n\tDeleted:\t%d/%d (%g%%).\n", len(input) - output, len(input), (100.0 - percent))
+	var percent float32 = float32(output) / total * 100.0
+	fmt.Printf("\n\tDeleted:\t%d/%d (%g%%).\n", len(input)-output, len(input), (100.0 - percent))
 	fmt.Printf("\tSelected:\t%d sentences.\n\n", len(abstract.Sentences))
 }
