@@ -40,7 +40,7 @@ func (language *Language) isSupported() (bool, error) {
 
 func (language *Language) getStopwords() error {
 	var err error
-	var location string = fmt.Sprintf("%s/%s", langs_dir, language.Label)
+	var location string = fmt.Sprintf("%s/stopwords_%s", langs_dir, language.Label)
 
 	var raw_stopwords []byte
 	if raw_stopwords, err = ioutil.ReadFile(location); err != nil {
