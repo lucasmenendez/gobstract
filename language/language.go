@@ -3,6 +3,7 @@ package language
 import (
 	"os"
 	"fmt"
+	"sort"
 	"errors"
 	"regexp"
 	"io/ioutil"
@@ -16,6 +17,20 @@ type Language struct {
 	Stopwords []string
 	Prefixes []string
 	Suffixes []string
+}
+
+type Suffixes []string
+
+func (sufs Suffixes) Len() int {
+	return len(sufs)
+}
+
+func (sufs Suffixes) Swap(i, j int) {
+	sufs[i], sufs[j] = sufs[j], sufs[i]
+}
+
+func (sufs Suffixes) Less(i, j int) bool {
+	return len(sufs[i]) > len(sufs[j])
 }
 
 func GetLanguage(label string) (*Language, error) {
@@ -48,6 +63,8 @@ func GetLanguage(label string) (*Language, error) {
 
 	language.Stopwords = stopwords
 	language.Prefixes = prefixes
+
+	sort.Sort(Suffixes(suffixes))
 	language.Suffixes = suffixes
 	return language, nil
 }

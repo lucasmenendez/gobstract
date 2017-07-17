@@ -57,14 +57,12 @@ func getWords(text string) []string {
 
 func (token Token) getroot(lang *language.Language) {
 	var root string = token.Raw
-	
 	for _, prefix := range lang.Prefixes {
 		if strings.HasPrefix(root, prefix) {
 			root = strings.Replace(root, prefix, "", -1)
 			break
 		} 
 	}
-
 	for _, suffix := range lang.Suffixes {
 		if strings.HasSuffix(root, suffix) {
 			root = strings.Replace(root, suffix, "", -1)
@@ -72,6 +70,7 @@ func (token Token) getroot(lang *language.Language) {
 	}
 
 	token.root = root
+	//token.root = token.Raw
 }
 
 func (token Token) isStopword(lang *language.Language) bool {

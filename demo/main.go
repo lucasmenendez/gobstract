@@ -8,11 +8,11 @@ import (
 	"github.com/lucasmenendez/gobstract"
 )
 
-var language = "es"
-var input_path = "./demo/input_es"
+var language string = "es"
 
 func main() {
 	var err error
+	var input_path string = fmt.Sprintf("./demo/input_%s", language)
 
 	var input_root string
 	if input_root, err = filepath.Abs(input_path); err != nil {
