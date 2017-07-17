@@ -8,8 +8,8 @@ import (
 	"github.com/lucasmenendez/gobstract"
 )
 
-var language = "en"
-var input_path = "./demo/input_en"
+var language = "es"
+var input_path = "./demo/input_es"
 
 func main() {
 	var err error

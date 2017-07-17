@@ -14,6 +14,42 @@ var langs_dir = "./language/data"
 type Language struct {
 	Label string
 	Stopwords []string
+	Prefixes []string
+	Suffixes []string
+}
+
+func GetLanguage(label string) (*Language, error) {
+	var stopwords []string
+	var prefixes []string
+	var suffixes []string
+	var language *Language = &Language{label, stopwords, prefixes, suffixes}
+
+	var err error
+	var supported bool
+	if supported, err = language.isSupported(); err != nil {
+		return nil, err
+	}
+
+	if !supported {
+		return nil, errors.New("Language not supported")
+	}
+
+	if stopwords, err = language.getDataset("stopwords"); err != nil {
+		return nil, err
+	}
+	
+	if prefixes, err = language.getDataset("prefixes"); err != nil {
+		return nil, err
+	}
+
+	if suffixes, err = language.getDataset("suffixes"); err != nil {
+		return nil, err
+	}
+
+	language.Stopwords = stopwords
+	language.Prefixes = prefixes
+	language.Suffixes = suffixes
+	return language, nil
 }
 
 func (language *Language) isSupported() (bool, error) {
@@ -30,7 +66,7 @@ func (language *Language) isSupported() (bool, error) {
 	}
 
 	for _, lang := range langs {
-		if !lang.IsDir() && lang.Name() == language.Label {
+		if lang.IsDir() && lang.Name() == language.Label {
 			return true, nil
 		}
 	}
@@ -38,37 +74,15 @@ func (language *Language) isSupported() (bool, error) {
 	return false, nil
 }
 
-func (language *Language) getStopwords() error {
+func (language *Language) getDataset(dataset string) ([]string, error) {
 	var err error
-	var location string = fmt.Sprintf("%s/stopwords_%s", langs_dir, language.Label)
+	var location string = fmt.Sprintf("%s/%s/%s", langs_dir, language.Label, dataset)
 
-	var raw_stopwords []byte
-	if raw_stopwords, err = ioutil.ReadFile(location); err != nil {
-		return err
-	}
-
-	var rgx_stopwords *regexp.Regexp = regexp.MustCompile(`\n`)
-	language.Stopwords = rgx_stopwords.Split(string(raw_stopwords), -1)
-	return nil
-}
-
-func GetLanguage(label string) (*Language, error) {
-	var stopwords []string
-	var language *Language = &Language{label, stopwords}
-
-	var err error
-	var supported bool
-	if supported, err = language.isSupported(); err != nil {
+	var raw []byte
+	if raw, err = ioutil.ReadFile(location); err != nil {
 		return nil, err
 	}
 
-	if !supported {
-		return nil, errors.New("Language not supported")
-	}
-
-	if err = language.getStopwords(); err != nil {
-		return nil, err
-	}
-
-	return language, nil
+	var rgx_linebreak *regexp.Regexp = regexp.MustCompile(`\n`)
+	return rgx_linebreak.Split(string(raw), -1), nil
 }

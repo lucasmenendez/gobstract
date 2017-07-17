@@ -3,10 +3,8 @@ package paragraph
 import (
 	"bufio"
 	"strings"
-
 	"github.com/lucasmenendez/gobstract/language"
 	"github.com/lucasmenendez/gobstract/sentence"
-	"github.com/lucasmenendez/gobstract/tokenizer"
 )
 
 var title_min int = 5
@@ -58,7 +56,7 @@ func SplitText(text string, lang *language.Language) *Paragraphs {
 }
 
 func (paragraph *Paragraph) split(order *int) {
-	var raw_lines []string = tokenizer.SplitSentences(paragraph.Line)
+	var raw_lines []string = sentence.SplitSentences(paragraph.Line)
 	var sentences sentence.Sentences
 	for _, raw_sentence := range raw_lines {
 		var content string = strings.TrimSpace(raw_sentence)

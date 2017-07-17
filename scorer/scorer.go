@@ -55,23 +55,21 @@ func (scorer *Scorer) Calc() {
 
 func (scorer *Scorer) neighbours() {
 	var scores []*Score
-	for i, s1 := range scorer.sentences {
+	for i, sentence1 := range scorer.sentences {
 		var score float64
-		for j, s2 := range scorer.sentences {
+		for j, sentence2 := range scorer.sentences {
 			if i != j {
 				var coincidences, average float64
-				for _, t1 := range s1.Tokens {
-					for _, t2 := range s2.Tokens {
-						if t1 == t2 {
-							coincidences += 1.0
-						}
+				for _, token := range sentence2.Tokens {
+					if sentence1.HasToken(token) {
+						coincidences += 1.0
 					}
 				}
-				average = float64(len(s1.Tokens) + len(s2.Tokens)) / 2.0
+				average = float64(len(sentence1.Tokens) + len(sentence2.Tokens))
 				score += coincidences / average
 			}
 		}
-		scores = append(scores, &Score{s1, score})
+		scores = append(scores, &Score{sentence1, score})
 	}
 	scorer.addScores(scores)
 }
@@ -79,8 +77,11 @@ func (scorer *Scorer) neighbours() {
 func (scorer *Scorer) keywords() {
 	var tokens []string
 	for _, sentence := range scorer.sentences {
-		tokens = append(tokens, sentence.Tokens...)
+		for _, token := range sentence.Tokens {
+			tokens = append(tokens, token.Raw)	
+		}
 	}
+
 	for _, paragraph := range *scorer.paragraphs {
 		if paragraph.Title != nil {
 			tokens = append(tokens, paragraph.Title.Tokens...)
