@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-var langs_dir = "./language/data"
+const langs_dir string = "./language/data"
 
 type Language struct {
 	Label string

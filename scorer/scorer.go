@@ -6,7 +6,7 @@ import (
 	"github.com/lucasmenendez/gobstract/token"
 )
 
-var scorable_length = 150
+const scorable_length int = 150
 
 type Score struct {
 	sentence *sentence.Sentence

@@ -7,8 +7,10 @@ import (
 	"github.com/lucasmenendez/gobstract/sentence"
 )
 
-var title_min int = 5
-var title_max int = 100
+const (
+	title_min int = 5
+	title_max int = 100
+)
 
 type Paragraph struct {
 	Title *sentence.Sentence

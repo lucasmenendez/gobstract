@@ -8,7 +8,7 @@ import (
 	"github.com/lucasmenendez/gobstract"
 )
 
-var language string = "es"
+const language string = "es"
 
 func main() {
 	var err error
