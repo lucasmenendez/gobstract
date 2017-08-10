@@ -72,7 +72,6 @@ func GetLanguage(label string) (*Language, error) {
 func (language *Language) isSupported() (bool, error) {
 	var err error
 	var location string
-
 	if location, err = filepath.Abs(langs_dir); err != nil {
 		return false, err
 	}
@@ -87,7 +86,6 @@ func (language *Language) isSupported() (bool, error) {
 			return true, nil
 		}
 	}
-
 	return false, nil
 }
 
@@ -100,6 +98,6 @@ func (language *Language) getDataset(dataset string) ([]string, error) {
 		return nil, err
 	}
 
-	var rgx_linebreak *regexp.Regexp = regexp.MustCompile(`\n`)
-	return rgx_linebreak.Split(string(raw), -1), nil
+	var rgxLn *regexp.Regexp = regexp.MustCompile(`\n`)
+	return rgxLn.Split(string(raw), -1), nil
 }

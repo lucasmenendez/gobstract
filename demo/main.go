@@ -12,19 +12,19 @@ const language string = "es"
 
 func main() {
 	var err error
-	var input_path string = fmt.Sprintf("./demo/input_%s", language)
+	var inputPath string = fmt.Sprintf("./demo/input_%s", language)
 
-	var input_root string
-	if input_root, err = filepath.Abs(input_path); err != nil {
+	var inputRoot string
+	if inputRoot, err = filepath.Abs(inputPath); err != nil {
 		panic(err)
 	}
 
-	var input_raw []byte
-	if input_raw, err = ioutil.ReadFile(input_root); err != nil {
+	var inputRaw []byte
+	if inputRaw, err = ioutil.ReadFile(inputRoot); err != nil {
 		panic(err)
 	}
 
-	var input string = string(input_raw)
+	var input string = string(inputRaw)
 	var abstract *gobstract.Gobstract
 	if abstract, err = gobstract.NewAbstract(input, language); err != nil {
 		panic(err)

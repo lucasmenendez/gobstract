@@ -51,21 +51,21 @@ func (sentence *Sentence) HasToken(t token.Token) bool {
 }
 
 func SplitSentences (input string) []string {
-	var titles_pattern *regexp.Regexp = regexp.MustCompile(`([A-Z][a-z]+)\.`)
-	var titles_needle string = `$1*|*`
-	var no_titles string = titles_pattern.ReplaceAllString(input, titles_needle)
+	var titlesPattern *regexp.Regexp = regexp.MustCompile(`([A-Z][a-z]+)\.`)
+	var titlesNeedle string = `$1*|*`
+	var noTitles string = titlesPattern.ReplaceAllString(input, titlesNeedle)
 
-	var numbers_pattern *regexp.Regexp = regexp.MustCompile(`([0-9]+)\.([0-9]+)`)
-	var numbers_needle string = `$1*|*$2`
-	var no_numbers string = numbers_pattern.ReplaceAllString(no_titles, numbers_needle)
+	var numbersPattern *regexp.Regexp = regexp.MustCompile(`([0-9]+)\.([0-9]+)`)
+	var numbersNeedle string = `$1*|*$2`
+	var no_numbers string = numbersPattern.ReplaceAllString(noTitles, numbersNeedle)
 
-	var stops_pattern *regexp.Regexp = regexp.MustCompile(`[^..][!?.]\s`)
-	var stops_needle string = `$0{stop}`
-	var no_stops string = stops_pattern.ReplaceAllString(no_numbers, stops_needle)
+	var stopsPattern *regexp.Regexp = regexp.MustCompile(`[^..][!?.]\s`)
+	var stopsNeedle string = `$0{stop}`
+	var noStops string = stopsPattern.ReplaceAllString(no_numbers, stopsNeedle)
 
-	var restore_pattern *regexp.Regexp = regexp.MustCompile(`\*\|\*`)
-	var restore_needle = `.`
-	var text string = restore_pattern.ReplaceAllString(no_stops, restore_needle)
+	var restorePattern *regexp.Regexp = regexp.MustCompile(`\*\|\*`)
+	var restoreNeedle = `.`
+	var text string = restorePattern.ReplaceAllString(noStops, restoreNeedle)
 
 	var spliter *regexp.Regexp = regexp.MustCompile(`{stop}`)
 	return spliter.Split(text, -1)

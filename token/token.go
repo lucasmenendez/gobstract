@@ -40,8 +40,8 @@ func (needle Token) IsIn(tokens []Token) bool {
 func getWords(text string) []string {
 	var words []string
 
-	var rgx_clean *regexp.Regexp= regexp.MustCompile(`\[|]|\(|\)|\{|}|“|”|«|»|,|´|’|-|_|—|\.\.|:`)
-	var cleaned string = rgx_clean.ReplaceAllString(text, "")
+	var rgxClean *regexp.Regexp= regexp.MustCompile(`\[|]|\(|\)|\{|}|“|”|«|»|,|´|’|-|_|—|\.\.|:`)
+	var cleaned string = rgxClean.ReplaceAllString(text, "")
 
 	var rgx_word = regexp.MustCompile(`\s`)
 	var parts []string = rgx_word.Split(cleaned, -1)

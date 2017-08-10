@@ -58,10 +58,10 @@ func SplitText(text string, lang *language.Language) *Paragraphs {
 }
 
 func (paragraph *Paragraph) split(order *int) {
-	var raw_lines []string = sentence.SplitSentences(paragraph.Line)
+	var rawLines []string = sentence.SplitSentences(paragraph.Line)
 	var sentences sentence.Sentences
-	for _, raw_sentence := range raw_lines {
-		var content string = strings.TrimSpace(raw_sentence)
+	for _, rawSentence := range rawLines {
+		var content string = strings.TrimSpace(rawSentence)
 
 		sentences = append(sentences, sentence.NewSentence(content, *order, paragraph.Lang))
 		*order++

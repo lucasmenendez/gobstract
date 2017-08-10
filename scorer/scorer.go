@@ -19,16 +19,16 @@ type Scorer struct {
 }
 
 func (scorer *Scorer) addScores(scores []*Score) {
-	var max_value, min_value float64
+	var maxValue, minValue float64
 	for _, score := range scores {
-		if score.value > max_value {
-			max_value = score.value
-		} else if score.value < min_value {
-			min_value = score.value
+		if score.value > maxValue {
+			maxValue = score.value
+		} else if score.value < minValue {
+			minValue = score.value
 		}
 	}
 
-	var rang float64 = max_value - min_value
+	var rang float64 = maxValue - minValue
 	for _, score := range scores {
 		var value float64 = score.value / rang * 0.3
 		score.sentence.Score += value
@@ -178,11 +178,11 @@ func (scorer *Scorer) order() {
 	for _, paragraph := range *scorer.paragraphs {
 		var paragraph_length int = len(*paragraph.Sentences)
 		for _, sentence := range *paragraph.Sentences {
-			var original_order int = sentence.Order - sum
-			if original_order == 1 || original_order == paragraph_length {
+			var oldOrder int = sentence.Order - sum
+			if oldOrder == 1 || oldOrder == paragraph_length {
 				sentence.Score += 0.2
 			}
-			scores = append(scores, &Score{sentence, float64(original_order)})
+			scores = append(scores, &Score{sentence, float64(oldOrder)})
 		}
 		sum += len(*paragraph.Sentences)
 	}
