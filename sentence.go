@@ -1,17 +1,15 @@
-package sentence
+package gobstract
 
 import (
 	"regexp"
 	"strings"
-	"github.com/lucasmenendez/gobstract/language"
-	"github.com/lucasmenendez/gobstract/token"
 )
 
 type Sentence struct {
 	Text string
 	raw_text string
-	Lang *language.Language
-	Tokens []token.Token
+	Lang *Language
+	Tokens []*Token
 	Score float64
 	Order int
 }
@@ -38,26 +36,22 @@ func (sentences Sentences) SortOrder() {
 	}
 }
 
-func NewSentence(text string, order int, lang *language.Language) *Sentence {
+func NewSentence(text string, order int, lang *Language) *Sentence {
 	var raw_text string = strings.ToLower(text)
-	var tokens []token.Token = token.GetTokens(raw_text, lang)
+	var tokens []*Token = GetTokens(raw_text, lang)
 	var score float64
 
 	return &Sentence{text, raw_text, lang, tokens, score, order}
 }
 
-func (sentence *Sentence) HasToken(t token.Token) bool {
+func (sentence *Sentence) HasToken(t *Token) bool {
 	return t.IsIn(sentence.Tokens)
 }
 
 func SplitSentences (input string) []string {
-	var titlesPattern *regexp.Regexp = regexp.MustCompile(`([A-Z][a-z]+)\.`)
-	var titlesNeedle string = `$1*|*`
-	var noTitles string = titlesPattern.ReplaceAllString(input, titlesNeedle)
-
 	var numbersPattern *regexp.Regexp = regexp.MustCompile(`([0-9]+)\.([0-9]+)`)
 	var numbersNeedle string = `$1*|*$2`
-	var no_numbers string = numbersPattern.ReplaceAllString(noTitles, numbersNeedle)
+	var no_numbers string = numbersPattern.ReplaceAllString(input, numbersNeedle)
 
 	var stopsPattern *regexp.Regexp = regexp.MustCompile(`[^..][!?.]\s`)
 	var stopsNeedle string = `$0{stop}`

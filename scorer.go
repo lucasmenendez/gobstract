@@ -1,21 +1,20 @@
-package scorer
+package gobstract
 
-import (
-	"github.com/lucasmenendez/gobstract/paragraph"
-	"github.com/lucasmenendez/gobstract/sentence"
-	"github.com/lucasmenendez/gobstract/token"
+import "sort"
+
+const (
+	scorableLength int = 150
+	maxKeywords int = 5
 )
 
-const scorable_length int = 150
-
 type Score struct {
-	sentence *sentence.Sentence
+	sentence *Sentence
 	value float64
 }
 
 type Scorer struct {
-	paragraphs *paragraph.Paragraphs
-	sentences sentence.Sentences
+	paragraphs 	*Paragraphs
+	sentences 	Sentences
 }
 
 func (scorer *Scorer) addScores(scores []*Score) {
@@ -35,27 +34,7 @@ func (scorer *Scorer) addScores(scores []*Score) {
 	}
 }
 
-
-func NewScorer(paragraphs *paragraph.Paragraphs) *Scorer {
-	var sentences sentence.Sentences
-	for _, paragraph := range *paragraphs {
-		for _, s := range *paragraph.Sentences {
-			if len(s.Text) > scorable_length {
-				sentences = append(sentences, s)
-			}
-		}
-	}
-	return &Scorer{paragraphs, sentences}
-}
-
-func (scorer *Scorer) Calc() {
-	scorer.neighbours()
-	scorer.keywords()
-	scorer.length()
-	scorer.order()
-}
-
-func (scorer *Scorer) neighbours() {
+func (scorer *Scorer) addNeighbours() {
 	var scores []*Score
 	for i, sentence1 := range scorer.sentences {
 		var score float64
@@ -76,8 +55,8 @@ func (scorer *Scorer) neighbours() {
 	scorer.addScores(scores)
 }
 
-func (scorer *Scorer) keywords() {
-	var tokens []token.Token
+func (scorer *Scorer) addKeywords() {
+	var tokens Tokens
 	for _, sentence := range scorer.sentences {
 		tokens = append(tokens, sentence.Tokens...)
 	}
@@ -89,11 +68,10 @@ func (scorer *Scorer) keywords() {
 	}
 
 	var max, min int = 0, len(tokens)
-	var weights map[token.Token]int = make(map[token.Token]int, len(tokens))
 	for i, token := range tokens {
 		var occurrences int = 0
 		for j, t := range tokens {
-			if i != j && token == t {
+			if i != j && token.Root == t.Root {
 				occurrences++
 			}
 		}
@@ -104,29 +82,30 @@ func (scorer *Scorer) keywords() {
 		if occurrences < min {
 			min = occurrences
 		}
-		weights[token] = occurrences
+		token.Score = occurrences
 	}
 
-	var keywords []token.Token
+	var keywords Tokens
 	var limit int = (max - min) / 3
-	for token, weight := range weights {
-		if weight >= limit {
+	for _, token := range tokens {
+		if token.Score >= limit {
 			keywords = append(keywords, token)
 		}
 	}
+
 
 	var scores []*Score
 	for _, sentence := range scorer.sentences {
 		var value float64
 		for _, keyword := range keywords {
-			var weight int = weights[keyword]
 			if sentence.HasToken(keyword) {
-				value += float64(weight) / float64(len(keywords))
+				value += float64(keyword.Score) / float64(len(keywords))
 			}
 		}
 
 		scores = append(scores, &Score{sentence, value})
 	}
+
 	scorer.addScores(scores)
 }
 
@@ -147,7 +126,7 @@ func (scorer *Scorer) length() {
 }
 
 func (scorer *Scorer) titles() {
-	var keywords []token.Token
+	var keywords Tokens
 	for _, paragraph := range *scorer.paragraphs {
 		if paragraph.Title != nil {
 			keywords = append(keywords, paragraph.Title.Tokens...)
@@ -182,16 +161,40 @@ func (scorer *Scorer) order() {
 			if oldOrder == 1 || oldOrder == paragraph_length {
 				sentence.Score += 0.2
 			}
-			scores = append(scores, &Score{sentence, float64(oldOrder)})
+			scores = append(scores, &Score{sentence: sentence, value: float64(oldOrder)})
 		}
 		sum += len(*paragraph.Sentences)
 	}
 	scorer.addScores(scores)
 }
 
+func NewScorer(paragraphs *Paragraphs) *Scorer {
+	var sentences Sentences
+	for _, paragraph := range *paragraphs {
+		for _, s := range *paragraph.Sentences {
+			if len(s.Text) > scorableLength {
+				sentences = append(sentences, s)
+			}
+		}
+	}
+	return &Scorer{paragraphs: paragraphs, sentences: sentences}
+}
+
+func (scorer *Scorer) Calc() {
+	scorer.addNeighbours()
+	scorer.addKeywords()
+	scorer.length()
+	scorer.order()
+}
+
+func (scorer *Scorer) SelectBestSentence() string {
+	scorer.sentences.SortScore()
+	return scorer.sentences[0].Text
+}
+
 func (scorer *Scorer) SelectHighlights() []string {
 	var sum_avg float64
-	var sentences_scored sentence.Sentences
+	var sentences_scored Sentences
 	for _, sentence := range scorer.sentences {
 		if sentence.Score > 0.0 {
 			sentences_scored = append(sentences_scored, sentence)
@@ -209,4 +212,39 @@ func (scorer *Scorer) SelectHighlights() []string {
 		}
 	}
 	return highlights
+}
+
+func (s *Scorer) SelectKeywords() []string {
+	var tokens Tokens
+	for _, sentence := range s.sentences {
+		tokens = append(tokens, sentence.Tokens...)
+	}
+
+	for _, paragraph := range *s.paragraphs {
+		if paragraph.Title != nil {
+			tokens = append(tokens, paragraph.Title.Tokens...)
+		}
+	}
+
+	sort.Sort(tokens)
+	var keywords []string
+	for _, t := range tokens {
+		var exists bool = false
+		for _, keyword := range keywords {
+			if t.Raw == keyword {
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			keywords = append(keywords, t.Raw)
+		}
+
+		if len(keywords) == maxKeywords {
+			break
+		}
+	}
+
+	return keywords
 }

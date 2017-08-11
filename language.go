@@ -1,16 +1,16 @@
-package language
+package gobstract
 
 import (
 	"os"
 	"fmt"
 	"sort"
+	"bufio"
 	"errors"
-	"regexp"
 	"io/ioutil"
 	"path/filepath"
 )
 
-const langs_dir string = "./language/data"
+const langs_dir string = "./language"
 
 type Language struct {
 	Label string
@@ -34,38 +34,34 @@ func (sufs Suffixes) Less(i, j int) bool {
 }
 
 func GetLanguage(label string) (*Language, error) {
-	var stopwords []string
-	var prefixes []string
-	var suffixes []string
-	var language *Language = &Language{label, stopwords, prefixes, suffixes}
+	var language *Language = &Language{Label: label}
 
-	var err error
-	var supported bool
-	if supported, err = language.isSupported(); err != nil {
+
+	if supported, err := language.isSupported(); err != nil {
 		return nil, err
-	}
-
-	if !supported {
+	} else if !supported {
 		return nil, errors.New("Language not supported")
 	}
 
-	if stopwords, err = language.getDataset("stopwords"); err != nil {
+	if stopwords, err := language.getDataset("stopwords"); err != nil {
 		return nil, err
+	} else {
+		language.Stopwords = stopwords
 	}
 	
-	if prefixes, err = language.getDataset("prefixes"); err != nil {
+	if prefixes, err := language.getDataset("prefixes"); err != nil {
 		return nil, err
+	} else {
+		language.Prefixes = prefixes
 	}
 
-	if suffixes, err = language.getDataset("suffixes"); err != nil {
+	if suffixes, err := language.getDataset("suffixes"); err != nil {
 		return nil, err
+	} else {
+		sort.Sort(Suffixes(suffixes))
+		language.Suffixes = suffixes
 	}
 
-	language.Stopwords = stopwords
-	language.Prefixes = prefixes
-
-	sort.Sort(Suffixes(suffixes))
-	language.Suffixes = suffixes
 	return language, nil
 }
 
@@ -90,14 +86,23 @@ func (language *Language) isSupported() (bool, error) {
 }
 
 func (language *Language) getDataset(dataset string) ([]string, error) {
-	var err error
+	var data []string
 	var location string = fmt.Sprintf("%s/%s/%s", langs_dir, language.Label, dataset)
 
-	var raw []byte
-	if raw, err = ioutil.ReadFile(location); err != nil {
+	if file, err := os.Open(location); err != nil {
 		return nil, err
+	} else {
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			data = append(data, scanner.Text())
+		}
+
+		if err = scanner.Err(); err != nil {
+			return nil, err
+		}
 	}
 
-	var rgxLn *regexp.Regexp = regexp.MustCompile(`\n`)
-	return rgxLn.Split(string(raw), -1), nil
+	return data, nil
 }

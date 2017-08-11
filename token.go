@@ -1,40 +1,28 @@
-package token
+package gobstract
 
 import (
 	"regexp"
 	"strings"
-	"github.com/lucasmenendez/gobstract/language"
 )
 
 type Token struct {
 	Raw string
-	root string
+	Root string
+	Score int
 }
 
-func GetTokens(text string, lang *language.Language) []Token {
-	var tokens []Token
-	
-	var words []string = getWords(text)
-	for _, word := range words {
-		var token Token = Token{Raw: word}
-		if token.isStopword(lang) {
-			continue
-		}
+type Tokens []*Token
 
-		token.getroot(lang)
-		tokens = append(tokens, token)
-	}
-
-	return tokens
+func (t Tokens) Len() int {
+	return len(t)
 }
 
-func (needle Token) IsIn(tokens []Token) bool {
-	for _, token := range tokens {
-		if token.root == needle.root {
-			return true
-		}
-	}
-	return false
+func (t Tokens) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
+func (t Tokens) Less(i, j int) bool {
+	return t[i].Score > t[j].Score
 }
 
 func getWords(text string) []string {
@@ -55,7 +43,7 @@ func getWords(text string) []string {
 	return words
 }
 
-func (token Token) getroot(lang *language.Language) {
+func (token *Token) getRoot(lang *Language) {
 	var root string = token.Raw
 	for _, prefix := range lang.Prefixes {
 		if strings.HasPrefix(root, prefix) {
@@ -69,13 +57,40 @@ func (token Token) getroot(lang *language.Language) {
 		}
 	}
 
-	token.root = root
+	token.Root = root
 	//token.root = token.Raw
 }
 
-func (token Token) isStopword(lang *language.Language) bool {
+func (token *Token) isStopword(lang *Language) bool {
 	for _, stopword := range lang.Stopwords {
 		if token.Raw == stopword {
+			return true
+		}
+	}
+	return false
+}
+
+func GetTokens(text string, lang *Language) []*Token {
+	var tokens []*Token
+
+	var words []string = getWords(text)
+	for _, word := range words {
+		word = strings.TrimSpace(word)
+		var token *Token = &Token{Raw: word}
+		if token.isStopword(lang) || len(token.Raw) == 0 {
+			continue
+		}
+
+		token.getRoot(lang)
+		tokens = append(tokens, token)
+	}
+
+	return tokens
+}
+
+func (needle *Token) IsIn(tokens []*Token) bool {
+	for _, token := range tokens {
+		if token.Root == needle.Root {
 			return true
 		}
 	}

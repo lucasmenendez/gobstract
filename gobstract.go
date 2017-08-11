@@ -1,33 +1,39 @@
 package gobstract
 
-import (
-	"github.com/lucasmenendez/gobstract/language"
-	"github.com/lucasmenendez/gobstract/paragraph"
-	"github.com/lucasmenendez/gobstract/scorer"
-)
-
 type Gobstract struct {
-	Text       string
-	Paragraphs *paragraph.Paragraphs
-	Sentences  []string
-	Lang       *language.Language
+	Text		string
+	Paragraphs	*Paragraphs
+	Sentences	[]string
+	Scorer		*Scorer
+	Lang		*Language
 }
 
 func NewAbstract(text string, lang_label string) (*Gobstract, error) {
 	var sentences []string
 
 	var err error
-	var lang *language.Language
-	if lang, err = language.GetLanguage(lang_label); err != nil {
+	var lang *Language
+	if lang, err = GetLanguage(lang_label); err != nil {
 		return nil, err
 	}
 
-	var paragraphs *paragraph.Paragraphs = paragraph.SplitText(text, lang)
-	var gobstract *Gobstract = &Gobstract{text, paragraphs, sentences, lang}
+	var paragraphs *Paragraphs = SplitText(text, lang)
+	var g *Gobstract = &Gobstract{Text: text, Paragraphs: paragraphs, Sentences: sentences, Lang: lang}
 
-	var scorer *scorer.Scorer = scorer.NewScorer(gobstract.Paragraphs)
-	scorer.Calc()
+	g.Scorer = NewScorer(g.Paragraphs)
+	g.Scorer.Calc()
 
-	gobstract.Sentences = scorer.SelectHighlights()
-	return gobstract, nil
+	return g, nil
+}
+
+func (g *Gobstract) GetBestSentence() string {
+	return g.Scorer.SelectBestSentence()
+}
+
+func (g *Gobstract) GetHightlights() []string {
+	return g.Scorer.SelectHighlights()
+}
+
+func (g *Gobstract) GetKeywords() []string {
+	return g.Scorer.SelectKeywords()
 }

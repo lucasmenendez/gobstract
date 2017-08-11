@@ -1,10 +1,8 @@
-package paragraph
+package gobstract
 
 import (
 	"bufio"
 	"strings"
-	"github.com/lucasmenendez/gobstract/language"
-	"github.com/lucasmenendez/gobstract/sentence"
 )
 
 const (
@@ -13,15 +11,15 @@ const (
 )
 
 type Paragraph struct {
-	Title *sentence.Sentence
+	Title *Sentence
 	Line string
-	Sentences *sentence.Sentences
-	Lang *language.Language
+	Sentences *Sentences
+	Lang *Language
 }
 
 type Paragraphs []*Paragraph
 
-func SplitText(text string, lang *language.Language) *Paragraphs {
+func SplitText(text string, lang *Language) *Paragraphs {
 	var paragraphs Paragraphs
 
 	var reader *strings.Reader = strings.NewReader(text)
@@ -29,8 +27,8 @@ func SplitText(text string, lang *language.Language) *Paragraphs {
 
 	var order int = 1
 	for scanner.Scan() {
-		var title *sentence.Sentence
-		var sentences *sentence.Sentences
+		var title *Sentence
+		var sentences *Sentences
 
 		var text string = scanner.Text()
 		var line string = strings.TrimSpace(text)
@@ -38,7 +36,7 @@ func SplitText(text string, lang *language.Language) *Paragraphs {
 			if len(line) <= title_min {
 				continue
 			} else if title_min < len(line) && len(line) <= title_max {
-				title = sentence.NewSentence(line, order, lang)
+				title = NewSentence(line, order, lang)
 
 				if scanner.Scan() {
 					line = scanner.Text()
@@ -58,12 +56,12 @@ func SplitText(text string, lang *language.Language) *Paragraphs {
 }
 
 func (paragraph *Paragraph) split(order *int) {
-	var rawLines []string = sentence.SplitSentences(paragraph.Line)
-	var sentences sentence.Sentences
+	var rawLines []string = SplitSentences(paragraph.Line)
+	var sentences Sentences
 	for _, rawSentence := range rawLines {
 		var content string = strings.TrimSpace(rawSentence)
 
-		sentences = append(sentences, sentence.NewSentence(content, *order, paragraph.Lang))
+		sentences = append(sentences, NewSentence(content, *order, paragraph.Lang))
 		*order++
 	}
 
