@@ -7,16 +7,14 @@ import (
 	"bufio"
 	"errors"
 	"io/ioutil"
-	"path/filepath"
 )
-
-const langs_dir string = "./language"
 
 type Language struct {
 	Label string
 	Stopwords []string
 	Prefixes []string
 	Suffixes []string
+	basePath string
 }
 
 type Suffixes []string
@@ -34,9 +32,12 @@ func (sufs Suffixes) Less(i, j int) bool {
 }
 
 func GetLanguage(label string) (*Language, error) {
-	var language *Language = &Language{Label: label}
+	var basePath string = os.Getenv("GOBSTRACT_LANGS")
+	if basePath == "" {
+		return nil, errors.New("'GOBSTRACT_LANGS' enviroment variable not defined.")
+	}
 
-
+	var language *Language = &Language{Label: label, basePath: basePath}
 	if supported, err := language.isSupported(); err != nil {
 		return nil, err
 	} else if !supported {
@@ -67,13 +68,8 @@ func GetLanguage(label string) (*Language, error) {
 
 func (language *Language) isSupported() (bool, error) {
 	var err error
-	var location string
-	if location, err = filepath.Abs(langs_dir); err != nil {
-		return false, err
-	}
-
 	var langs []os.FileInfo
-	if langs, err = ioutil.ReadDir(location); err != nil {
+	if langs, err = ioutil.ReadDir(language.basePath); err != nil {
 		return false, err
 	}
 
@@ -87,7 +83,7 @@ func (language *Language) isSupported() (bool, error) {
 
 func (language *Language) getDataset(dataset string) ([]string, error) {
 	var data []string
-	var location string = fmt.Sprintf("%s/%s/%s", langs_dir, language.Label, dataset)
+	var location string = fmt.Sprintf("%s/%s/%s", language.basePath, language.Label, dataset)
 
 	if file, err := os.Open(location); err != nil {
 		return nil, err
