@@ -189,12 +189,11 @@ func (scorer *Scorer) Calc() {
 
 func (scorer *Scorer) SelectBestSentence() string {
 	scorer.sentences.SortScore()
-
 	if len(scorer.sentences) > 0 {
 		return scorer.sentences[0].Text
 	}
 
-	return nil
+	return ""
 }
 
 func (scorer *Scorer) SelectHighlights() []string {
