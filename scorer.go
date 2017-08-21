@@ -3,7 +3,7 @@ package gobstract
 import "sort"
 
 const (
-	scorableLength int = 150
+	scorableLength int = 100
 	maxKeywords int = 5
 )
 
@@ -170,6 +170,7 @@ func (scorer *Scorer) order() {
 
 func NewScorer(paragraphs *Paragraphs) *Scorer {
 	var sentences Sentences
+
 	for _, paragraph := range *paragraphs {
 		for _, s := range *paragraph.Sentences {
 			if len(s.Text) > scorableLength {
