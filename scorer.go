@@ -1,6 +1,9 @@
 package gobstract
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 const (
 	scorableLength int = 100
@@ -232,18 +235,18 @@ func (s *Scorer) SelectKeywords() []string {
 	}
 
 	sort.Sort(tokens)
-	var keywords []string
+	var keywords Tokens
 	for _, t := range tokens {
 		var exists bool = false
 		for _, keyword := range keywords {
-			if t.Raw == keyword {
+			if t.Root == keyword.Root {
 				exists = true
 				break
 			}
 		}
 
 		if !exists {
-			keywords = append(keywords, t.Raw)
+			keywords = append(keywords, t)
 		}
 
 		if len(keywords) == maxKeywords {
@@ -251,5 +254,13 @@ func (s *Scorer) SelectKeywords() []string {
 		}
 	}
 
-	return keywords
+
+	var raw_keywords []string
+	for _, keyword := range keywords {
+		if strings.TrimSpace(keyword.Raw) != "" {
+			raw_keywords = append(raw_keywords, keyword.Raw)
+		}
+	}
+
+	return raw_keywords
 }
