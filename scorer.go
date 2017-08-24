@@ -200,7 +200,7 @@ func (scorer *Scorer) SelectBestSentence() string {
 	return ""
 }
 
-func (scorer *Scorer) SelectHighlights() []string {
+func (scorer *Scorer) SelectHighlights(max int) []string {
 	var sum_avg float64
 	var sentences_scored Sentences
 	for _, sentence := range scorer.sentences {
@@ -208,6 +208,11 @@ func (scorer *Scorer) SelectHighlights() []string {
 			sentences_scored = append(sentences_scored, sentence)
 			sum_avg += sentence.Score
 		}
+	}
+
+	if max > -1 {
+		sentences_scored.SortScore()
+		sentences_scored = sentences_scored[:max]
 	}
 
 	sentences_scored.SortOrder()

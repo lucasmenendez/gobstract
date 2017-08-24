@@ -30,8 +30,13 @@ func (g *Gobstract) GetBestSentence() string {
 	return g.Scorer.SelectBestSentence()
 }
 
-func (g *Gobstract) GetHightlights() []string {
-	return g.Scorer.SelectHighlights()
+func (g *Gobstract) GetHightlights(max ...int) []string {
+	var limit int = -1
+	if len(max) == 1 {
+		limit = max[0]
+	}
+
+	return g.Scorer.SelectHighlights(limit)
 }
 
 func (g *Gobstract) GetKeywords() []string {
