@@ -16,6 +16,10 @@ type Sentence struct {
 
 type Sentences []*Sentence
 
+func (sentences Sentences) Delete(index int) {
+	sentences = append(sentences[:index], sentences[index+1:]...)
+}
+
 func (sentences Sentences) SortScore() {
 	for i := 0; i < len(sentences); i++ {
 		for j:= i+1; j < len(sentences); j++ {

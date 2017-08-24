@@ -210,6 +210,8 @@ func (scorer *Scorer) SelectHighlights(max int) []string {
 		}
 	}
 
+	var avg float64 = sum_avg / float64(len(sentences_scored))
+
 	if max > -1 && max < len(sentences_scored) {
 		sentences_scored.SortScore()
 		sentences_scored = sentences_scored[:max]
@@ -218,7 +220,6 @@ func (scorer *Scorer) SelectHighlights(max int) []string {
 	sentences_scored.SortOrder()
 
 	var highlights []string
-	var avg float64 = sum_avg / float64(len(sentences_scored))
 	for _, sentence := range sentences_scored {
 		if sentence.Score > avg {
 			highlights = append(highlights, sentence.Text)
