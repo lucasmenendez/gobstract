@@ -210,7 +210,7 @@ func (scorer *Scorer) SelectHighlights(max int) []string {
 		}
 	}
 
-	if max > -1 {
+	if max > -1 && max < len(sentences_scored) {
 		sentences_scored.SortScore()
 		sentences_scored = sentences_scored[:max]
 	}
