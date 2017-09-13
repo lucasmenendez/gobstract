@@ -181,6 +181,16 @@ func NewScorer(paragraphs *Paragraphs) *Scorer {
 			}
 		}
 	}
+
+	for i, s1 := range sentences {
+		for j, s2 := range sentences {
+			if i != j && s1.Text == s2.Text {
+				sentences.Delete(i)
+				break
+			}
+		}
+	}
+
 	return &Scorer{paragraphs: paragraphs, sentences: sentences}
 }
 
