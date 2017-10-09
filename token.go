@@ -3,7 +3,6 @@ package gobstract
 import (
 	"regexp"
 	"strings"
-	"go/token"
 )
 
 type Token struct {
