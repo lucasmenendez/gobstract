@@ -1,3 +1,5 @@
+// Package gobstract provide simple abstract algorithm and keywords extractor
+// using simple linguistic weight scorers
 package gobstract
 
 type Gobstract struct {
@@ -8,17 +10,16 @@ type Gobstract struct {
 	Lang		*Language
 }
 
-func NewAbstract(text string, lang_label string) (*Gobstract, error) {
-	var sentences []string
-
-	var err error
-	var lang *Language
-	if lang, err = GetLanguage(lang_label); err != nil {
-		return nil, err
+func NewAbstract(text string, lang string) (*Gobstract, error) {
+	var l *Language
+	var e error
+	if l, e = GetLanguage(lang); e != nil {
+		return nil, e
 	}
 
-	var paragraphs *Paragraphs = SplitText(text, lang)
-	var g *Gobstract = &Gobstract{Text: text, Paragraphs: paragraphs, Sentences: sentences, Lang: lang}
+	var s []string
+	var p *Paragraphs = SplitText(text, l)
+	var g *Gobstract = &Gobstract{Text: text, Paragraphs: p, Sentences: s, Lang: l}
 
 	g.Scorer = NewScorer(g.Paragraphs)
 	g.Scorer.Calc()
@@ -31,12 +32,12 @@ func (g *Gobstract) GetBestSentence() string {
 }
 
 func (g *Gobstract) GetHightlights(max ...int) []string {
-	var limit int = -1
+	var l int = -1
 	if len(max) == 1 {
-		limit = max[0]
+		l = max[0]
 	}
 
-	return g.Scorer.SelectHighlights(limit)
+	return g.Scorer.SelectHighlights(l)
 }
 
 func (g *Gobstract) GetKeywords() []string {

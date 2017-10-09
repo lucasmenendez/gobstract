@@ -19,84 +19,82 @@ type Language struct {
 
 type Suffixes []string
 
-func (sufs Suffixes) Len() int {
-	return len(sufs)
+func (s Suffixes) Len() int {
+	return len(s)
 }
 
-func (sufs Suffixes) Swap(i, j int) {
-	sufs[i], sufs[j] = sufs[j], sufs[i]
+func (s Suffixes) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
-func (sufs Suffixes) Less(i, j int) bool {
-	return len(sufs[i]) > len(sufs[j])
+func (s Suffixes) Less(i, j int) bool {
+	return len(s[i]) > len(s[j])
 }
 
-func GetLanguage(label string) (*Language, error) {
-	var basePath string = os.Getenv("GOBSTRACT_LANGS")
-	if basePath == "" {
+func GetLanguage(label string) (language *Language, err error) {
+	var path string = os.Getenv("GOBSTRACT_LANGS")
+	if path == "" {
 		return nil, errors.New("'GOBSTRACT_LANGS' enviroment variable not defined.")
 	}
 
-	var language *Language = &Language{Label: label, basePath: basePath}
-	if supported, err := language.isSupported(); err != nil {
-		return nil, err
-	} else if !supported {
+	language = &Language{Label: label, basePath: path}
+	if s, e := language.isSupported(); e != nil {
+		return nil, e
+	} else if !s {
 		return nil, errors.New("Language not supported")
 	}
 
-	if stopwords, err := language.getDataset("stopwords"); err != nil {
-		return nil, err
+	if s, r := language.getDataset("stopwords"); r != nil {
+		return nil, r
 	} else {
-		language.Stopwords = stopwords
+		language.Stopwords = s
 	}
 	
-	if prefixes, err := language.getDataset("prefixes"); err != nil {
-		return nil, err
+	if p, e := language.getDataset("prefixes"); e != nil {
+		return nil, e
 	} else {
-		language.Prefixes = prefixes
+		language.Prefixes = p
 	}
 
-	if suffixes, err := language.getDataset("suffixes"); err != nil {
-		return nil, err
+	if s, e := language.getDataset("suffixes"); e != nil {
+		return nil, e
 	} else {
-		sort.Sort(Suffixes(suffixes))
-		language.Suffixes = suffixes
+		sort.Sort(Suffixes(s))
+		language.Suffixes = s
 	}
 
 	return language, nil
 }
 
-func (language *Language) isSupported() (bool, error) {
+func (l *Language) isSupported() (bool, error) {
 	var err error
 	var langs []os.FileInfo
-	if langs, err = ioutil.ReadDir(language.basePath); err != nil {
+	if langs, err = ioutil.ReadDir(l.basePath); err != nil {
 		return false, err
 	}
 
 	for _, lang := range langs {
-		if lang.IsDir() && lang.Name() == language.Label {
+		if lang.IsDir() && lang.Name() == l.Label {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-func (language *Language) getDataset(dataset string) ([]string, error) {
-	var data []string
-	var location string = fmt.Sprintf("%s/%s/%s", language.basePath, language.Label, dataset)
-
-	if file, err := os.Open(location); err != nil {
-		return nil, err
+func (l *Language) getDataset(dataset string) (data []string, e error) {
+	var loc string = fmt.Sprintf("%s/%s/%s", l.basePath, l.Label, dataset)
+	if f, e := os.Open(loc); e != nil {
+		return nil, e
 	} else {
-		defer file.Close()
+		defer f.Close()
 
-		scanner := bufio.NewScanner(file)
+		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
 			data = append(data, scanner.Text())
 		}
 
-		if err = scanner.Err(); err != nil {
-			return nil, err
+		if e = scanner.Err(); e != nil {
+			return nil, e
 		}
 	}
 

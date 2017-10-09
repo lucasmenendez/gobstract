@@ -3,6 +3,7 @@ package gobstract
 import (
 	"regexp"
 	"strings"
+	"go/token"
 )
 
 type Token struct {
@@ -25,26 +26,24 @@ func (t Tokens) Less(i, j int) bool {
 	return t[i].Score > t[j].Score
 }
 
-func getWords(text string) []string {
-	var words []string
-
+func getWords(text string) (words []string) {
 	var rgxClean *regexp.Regexp= regexp.MustCompile(`\[|]|\(|\)|\{|}|“|”|«|»|,|´|’|-|_|—|\.\.|:`)
 	var cleaned string = rgxClean.ReplaceAllString(text, "")
 
-	var rgx_word = regexp.MustCompile(`\s`)
-	var parts []string = rgx_word.Split(cleaned, -1)
+	var rgxWord = regexp.MustCompile(`\s`)
+	var p []string = rgxWord.Split(cleaned, -1)
 
-	for _, raw_word := range parts {
-		var word string = strings.TrimSpace(raw_word)
-		if len(word) > 3 {
-			words = append(words, strings.ToLower(word))
+	for _, r := range p {
+		var w string = strings.TrimSpace(r)
+		if len(w) > 3 {
+			words = append(words, strings.ToLower(w))
 		}
 	}
 	return words
 }
 
-func (token *Token) getRoot(lang *Language) {
-	var root string = token.Raw
+func (t *Token) getRoot(lang *Language) {
+	var root string = t.Raw
 	for _, prefix := range lang.Prefixes {
 		if strings.HasPrefix(root, prefix) {
 			root = strings.Replace(root, prefix, "", -1)
@@ -57,40 +56,38 @@ func (token *Token) getRoot(lang *Language) {
 		}
 	}
 
-	token.Root = root
-	//token.root = token.Raw
+	t.Root = root
 }
 
-func (token *Token) isStopword(lang *Language) bool {
-	for _, stopword := range lang.Stopwords {
-		if token.Raw == stopword {
+func (t *Token) isStopword(lang *Language) bool {
+	for _, s := range lang.Stopwords {
+		if t.Raw == s {
 			return true
 		}
 	}
 	return false
 }
 
-func GetTokens(text string, lang *Language) []*Token {
-	var tokens []*Token
-
+func GetTokens(text string, lang *Language) (tokens []*Token) {
 	var words []string = getWords(text)
-	for _, word := range words {
-		word = strings.TrimSpace(word)
-		var token *Token = &Token{Raw: word}
-		if token.isStopword(lang) || len(token.Raw) == 0 {
+	for _, w := range words {
+		w = strings.TrimSpace(w)
+		var t *Token = &Token{Raw: w}
+
+		if t.isStopword(lang) || len(t.Raw) == 0 {
 			continue
 		}
 
-		token.getRoot(lang)
-		tokens = append(tokens, token)
+		t.getRoot(lang)
+		tokens = append(tokens, t)
 	}
 
 	return tokens
 }
 
-func (needle *Token) IsIn(tokens []*Token) bool {
-	for _, token := range tokens {
-		if token.Root == needle.Root {
+func (n *Token) IsIn(tokens []*Token) bool {
+	for _, t := range tokens {
+		if t.Root == n.Root {
 			return true
 		}
 	}

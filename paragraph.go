@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	title_min int = 5
-	title_max int = 100
+	titleMin int = 5
+	titleMax int = 100
 )
 
 type Paragraph struct {
@@ -19,51 +19,50 @@ type Paragraph struct {
 
 type Paragraphs []*Paragraph
 
-func SplitText(text string, lang *Language) *Paragraphs {
-	var paragraphs Paragraphs
+func SplitText(text string, lang *Language) (paragraphs *Paragraphs) {
+	var ps Paragraphs
+	var r *strings.Reader = strings.NewReader(text)
+	var s *bufio.Scanner = bufio.NewScanner(r)
 
-	var reader *strings.Reader = strings.NewReader(text)
-	var scanner *bufio.Scanner = bufio.NewScanner(reader)
-
-	var order int = 1
-	for scanner.Scan() {
+	var o int = 1
+	for s.Scan() {
 		var title *Sentence
 		var sentences *Sentences
 
-		var text string = scanner.Text()
+		var text string = s.Text()
 		var line string = strings.TrimSpace(text)
 		if len(line) > 0 {
-			if len(line) <= title_min {
+			if len(line) <= titleMin {
 				continue
-			} else if title_min < len(line) && len(line) <= title_max {
-				title = NewSentence(line, order, lang)
+			} else if titleMin < len(line) && len(line) <= titleMax {
+				title = NewSentence(line, o, lang)
 
-				if scanner.Scan() {
-					line = scanner.Text()
+				if s.Scan() {
+					line = s.Text()
 				} else {
 					break
 				}
 			}
 
-			var paragraph *Paragraph = &Paragraph{title, line, sentences, lang}
-			paragraph.split(&order)
+			var p *Paragraph = &Paragraph{title, line, sentences, lang}
+			p.split(&o)
 
-			paragraphs = append(paragraphs, paragraph)
+			ps = append(ps, p)
 		}
 	}
 
-	return &paragraphs
+	return &ps
 }
 
-func (paragraph *Paragraph) split(order *int) {
-	var rawLines []string = SplitSentences(paragraph.Line)
-	var sentences Sentences
-	for _, rawSentence := range rawLines {
-		var content string = strings.TrimSpace(rawSentence)
+func (p *Paragraph) split(o *int) {
+	var l []string = SplitSentences(p.Line)
+	var s Sentences
+	for _, r := range l {
+		var c string = strings.TrimSpace(r)
 
-		sentences = append(sentences, NewSentence(content, *order, paragraph.Lang))
-		*order++
+		s = append(s, NewSentence(c, *o, p.Lang))
+		*o++
 	}
 
-	paragraph.Sentences = &sentences
+	p.Sentences = &s
 }
