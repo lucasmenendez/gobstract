@@ -67,6 +67,18 @@ func (t *Token) isStopword(lang *Language) bool {
 	return false
 }
 
+func (o *Token) diff(t *Token) (diff float64) {
+	var distRaw, distRoot int = levenshtain(o.Raw, t.Raw), levenshtain(o.Root, t.Root)
+	var lenRaw, lenRoot float64 = float64(len(o.Raw) + len(t.Raw)) / 2.0, float64(len(o.Root) + len(t.Root)) / 2.0
+
+	var diffRaw, diffRoot float64 = float64(distRaw) / lenRaw, float64(distRoot) / lenRoot
+	diff = (diffRaw + diffRoot) / 2.0
+
+	//diff = float64(levenshtain(o.Raw, t.Raw)) / lenRaw
+
+	return diff
+}
+
 func GetTokens(text string, lang *Language) (tokens []*Token) {
 	var words []string = getWords(text)
 	for _, w := range words {
@@ -84,9 +96,9 @@ func GetTokens(text string, lang *Language) (tokens []*Token) {
 	return tokens
 }
 
-func (n *Token) IsIn(tokens []*Token) bool {
+func (o *Token) IsIn(tokens []*Token) bool {
 	for _, t := range tokens {
-		if t.Root == n.Root {
+		if t.Root == o.Root {
 			return true
 		}
 	}

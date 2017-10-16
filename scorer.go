@@ -3,11 +3,12 @@ package gobstract
 import (
 	"sort"
 	"strings"
+	"fmt"
 )
 
 const (
 	scorableLength int = 100
-	maxKeywords int = 5
+	maxKeywords int = 10
 )
 
 type Score struct {
@@ -36,7 +37,7 @@ func (sc *Scorer) addScores(scores []*Score) {
 	}
 }
 
-func (sc *Scorer) addNeighbours() {
+func (sc *Scorer) neighbours() {
 	var scores []*Score
 	for i, s1 := range sc.sentences {
 		var score float64
@@ -57,7 +58,7 @@ func (sc *Scorer) addNeighbours() {
 	sc.addScores(scores)
 }
 
-func (sc *Scorer) addKeywords() {
+func (sc *Scorer) keywords() {
 	var tokens Tokens
 	for _, s := range sc.sentences {
 		tokens = append(tokens, s.Tokens...)
@@ -95,11 +96,16 @@ func (sc *Scorer) addKeywords() {
 		}
 	}
 
-
 	var scores []*Score
 	for _, s := range sc.sentences {
 		var v float64
 		for _, k := range keywords {
+			for _, t := range s.Tokens {
+				var diff float64 = k.diff(t)
+				if diff < 0.66 {
+					v += float64(k.Score) / float64(len(keywords))
+				}
+			}
 			if s.HasToken(k) {
 				v += float64(k.Score) / float64(len(keywords))
 			}
@@ -170,32 +176,80 @@ func (sc *Scorer) order() {
 	sc.addScores(scores)
 }
 
-func NewScorer(paragraphs *Paragraphs) *Scorer {
-	var sentences Sentences
+func (sc *Scorer) printLevenshtain() {
+	for _, sp := range sc.sentences {
+		var s Sentence = *sp
+		var matrix [][]float64 = make([][]float64, len(s.Tokens))
+		for i := 0; i < len(matrix); i++ {
+			matrix[i] = make([]float64, len(s.Tokens))
+		}
 
+		fmt.Println(s.Text)
+
+		for i := 0; i < len(s.Tokens); i++ {
+			var t1 *Token = s.Tokens[i]
+			for j := 0; j < len(s.Tokens); j++ {
+				var t2 *Token = s.Tokens[j]
+
+				matrix[i][j] = t1.diff(t2)
+			}
+		}
+
+		fmt.Print(" NULL \t")
+		for _, t := range s.Tokens {
+			fmt.Printf("%s\t", t.Raw)
+		}
+		fmt.Println("")
+
+		for i := 0; i < len(s.Tokens); i++ {
+			var t *Token = s.Tokens[i]
+			fmt.Printf("%s\t", t.Raw)
+			for j := 0; j < len(s.Tokens); j++ {
+				fmt.Printf("%f\t", matrix[i][j])
+			}
+			fmt.Println("")
+		}
+	}
+}
+
+func NewScorer(paragraphs *Paragraphs) *Scorer {
+	var a Sentences
 	for _, p := range *paragraphs {
 		for _, s := range *p.Sentences {
 			if len(s.Text) > scorableLength {
-				sentences = append(sentences, s)
+				a = append(a, s)
 			}
 		}
 	}
 
-	for i, s1 := range sentences {
-		for j, s2 := range sentences {
-			if i != j && s1.Text == s2.Text {
-				sentences.Delete(i)
+	var la int = len(a)
+	for i := 0; i < la; i++ {
+		var x *Sentence = a[i]
+		for j := 0; j < la; j++ {
+			var y *Sentence = a[j]
+			if i != j && x.Text == y.Text {
+				a.Delete(i)
+				la--
 				break
 			}
 		}
 	}
 
-	return &Scorer{paragraphs: paragraphs, sentences: sentences}
+	var s Sentences
+	for _, x := range a {
+		if x != nil {
+			s = append(s, x)
+		}
+	}
+
+	return &Scorer{paragraphs: paragraphs, sentences: s}
 }
 
 func (sc *Scorer) Calc() {
-	sc.addNeighbours()
-	sc.addKeywords()
+	sc.neighbours()
+	sc.keywords()
+
+	sc.titles()
 	sc.length()
 	sc.order()
 }
