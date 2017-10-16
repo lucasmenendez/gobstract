@@ -35,10 +35,12 @@ func main() {
         for _, s := range abstract.GetKeywords() {
             fmt.Printf("%s, ", s)
         }
-
+        
+        var length int = 0
         fmt.Println("\n\nSummary:")
         for _, sentence := range abstract.GetHightlights(10) {
             fmt.Println(sentence)
+            length += len(sentence)
         }
 
         fmt.Println("\nReduced in:")
