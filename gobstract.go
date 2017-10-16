@@ -2,6 +2,14 @@
 // using simple linguistic weight scorers
 package gobstract
 
+const (
+	titleMin int = 5
+	titleMax int = 100
+	scorableLength int = 100
+	maxKeywords int = 5
+	maxLevenshtain = 0.5
+)
+
 type Gobstract struct {
 	Text		string
 	Paragraphs	*Paragraphs

@@ -5,11 +5,6 @@ import (
 	"strings"
 )
 
-const (
-	titleMin int = 5
-	titleMax int = 100
-)
-
 type Paragraph struct {
 	Title *Sentence
 	Line string

@@ -6,11 +6,6 @@ import (
 	"fmt"
 )
 
-const (
-	scorableLength int = 100
-	maxKeywords int = 10
-)
-
 type Score struct {
 	sentence *Sentence
 	value float64
@@ -19,6 +14,7 @@ type Score struct {
 type Scorer struct {
 	paragraphs 	*Paragraphs
 	sentences 	Sentences
+	tags		Tokens
 }
 
 func (sc *Scorer) addScores(scores []*Score) {
@@ -91,7 +87,15 @@ func (sc *Scorer) keywords() {
 	var keywords Tokens
 	var l int = (max - min) / 3
 	for _, t := range tokens {
-		if t.Score >= l {
+		var included bool = false
+		for _, k := range keywords {
+			if t.diff(k) < maxLevenshtain {
+				included = true
+				break
+			}
+		}
+
+		if t.Score >= l && !included {
 			keywords = append(keywords, t)
 		}
 	}
@@ -100,12 +104,6 @@ func (sc *Scorer) keywords() {
 	for _, s := range sc.sentences {
 		var v float64
 		for _, k := range keywords {
-			for _, t := range s.Tokens {
-				var diff float64 = k.diff(t)
-				if diff < 0.66 {
-					v += float64(k.Score) / float64(len(keywords))
-				}
-			}
 			if s.HasToken(k) {
 				v += float64(k.Score) / float64(len(keywords))
 			}
@@ -114,6 +112,7 @@ func (sc *Scorer) keywords() {
 		scores = append(scores, &Score{s, v})
 	}
 
+	sc.tags = keywords
 	sc.addScores(scores)
 }
 
@@ -145,7 +144,7 @@ func (sc *Scorer) titles() {
 	for _, s := range sc.sentences {
 		var	o int
 		for _, k := range keywords {
-			if s.HasToken(k) {
+			if s.HasSimilarToken(k) {
 				o++
 			}
 		}
@@ -290,16 +289,7 @@ func (sc *Scorer) SelectHighlights(max int) (highlights []string) {
 }
 
 func (sc *Scorer) SelectKeywords() (keywords []string) {
-	var tokens Tokens
-	for _, s := range sc.sentences {
-		tokens = append(tokens, s.Tokens...)
-	}
-
-	for _, p := range *sc.paragraphs {
-		if p.Title != nil {
-			tokens = append(tokens, p.Title.Tokens...)
-		}
-	}
+	var tokens Tokens = sc.tags
 
 	sort.Sort(tokens)
 	var raw Tokens
@@ -320,7 +310,6 @@ func (sc *Scorer) SelectKeywords() (keywords []string) {
 			break
 		}
 	}
-
 
 	for _, keyword := range raw {
 		if strings.TrimSpace(keyword.Raw) != "" {

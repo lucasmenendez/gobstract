@@ -50,6 +50,10 @@ func NewSentence(txt string, o int, l *Language) (s *Sentence) {
 	return &Sentence{txt, r, l, t, sc, o}
 }
 
+func (s *Sentence) HasSimilarToken(t *Token) bool {
+	return t.IsSimilarIn(s.Tokens)
+}
+
 func (s *Sentence) HasToken(t *Token) bool {
 	return t.IsIn(s.Tokens)
 }

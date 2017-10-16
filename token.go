@@ -74,8 +74,6 @@ func (o *Token) diff(t *Token) (diff float64) {
 	var diffRaw, diffRoot float64 = float64(distRaw) / lenRaw, float64(distRoot) / lenRoot
 	diff = (diffRaw + diffRoot) / 2.0
 
-	//diff = float64(levenshtain(o.Raw, t.Raw)) / lenRaw
-
 	return diff
 }
 
@@ -94,6 +92,15 @@ func GetTokens(text string, lang *Language) (tokens []*Token) {
 	}
 
 	return tokens
+}
+
+func (o *Token) IsSimilarIn(tokens []*Token) bool {
+	for _, t := range tokens {
+		if o.diff(t) < maxLevenshtain {
+			return true
+		}
+	}
+	return false
 }
 
 func (o *Token) IsIn(tokens []*Token) bool {
