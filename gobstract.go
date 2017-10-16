@@ -6,7 +6,7 @@ const (
 	titleMin int = 5
 	titleMax int = 100
 	scorableLength int = 100
-	maxKeywords int = 5
+	maxKeywords int = 6
 	maxLevenshtain = 0.5
 )
 
