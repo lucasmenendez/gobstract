@@ -2,6 +2,8 @@
 // using simple linguistic weight scorers
 package gobstract
 
+import "github.com/lucasmenendez/gotagger"
+
 const (
 	titleMin int = 5
 	titleMax int = 100
@@ -49,5 +51,9 @@ func (g *Gobstract) GetHightlights(max ...int) []string {
 }
 
 func (g *Gobstract) GetKeywords() []string {
+	if keywords, err := gotagger.Tag(g.Lang.Label, g.Text); err == nil {
+		return keywords[:maxKeywords]
+	}
+
 	return g.Scorer.SelectKeywords()
 }

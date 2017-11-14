@@ -7,7 +7,7 @@ import (
 
 type Paragraph struct {
 	Title *Sentence
-	Line string
+	Raw string
 	Sentences *Sentences
 	Lang *Language
 }
@@ -50,7 +50,7 @@ func SplitText(text string, lang *Language) (paragraphs *Paragraphs) {
 }
 
 func (p *Paragraph) split(o *int) {
-	var l []string = SplitSentences(p.Line)
+	var l []string = SplitSentences(p.Raw)
 	var s Sentences
 	for _, r := range l {
 		var c string = strings.TrimSpace(r)
