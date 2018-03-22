@@ -1,76 +1,42 @@
 package gobstract
 
-import (
-	"regexp"
-	"strings"
-)
+const tokenSimilarityThreshold float64 = 0.55
+const sentenceSimilarityThreshold float64 = 0.2
 
-type Sentence struct {
-	Text    string
-	rawText string
-	Lang    *Language
-	Tokens  []*Token
-	Score   float64
-	Order   int
+type sentence struct {
+	tokens []string
+	raw    string
+	weight float64
+	length float64
+	order  int
 }
 
-type Sentences []*Sentence
+func (s sentence) isSimilar(s2 sentence) bool {
+	var c float64
+	for _, t1 := range s.tokens {
+		var d float64
+		var rate float64 = float64(len(t1)) / float64(len(s.tokens))
+		for _, t2 := range s2.tokens {
+			d += strSimilarity(t1, t2) * rate
+		}
 
-func (s Sentences) Delete(index int) (sentences Sentences){
-	copy(s[index:], s[index + 1:])
-	s[len(s) - 1] = nil
-	return s[:len(s) - 1]
-}
-
-func (s Sentences) SortScore() {
-	for i := 0; i < len(s); i++ {
-		for j := i+1; j < len(s); j++ {
-			if s[j].Score > s[i].Score {
-				s[i], s[j] = s[j], s[i]
-			}
+		if d > tokenSimilarityThreshold {
+			c++
 		}
 	}
+	return c/float64(len(s.tokens)) > sentenceSimilarityThreshold
 }
 
-func (s Sentences) SortOrder() {
-	for i := 0; i < len(s); i++ {
-		for j := i+1; j < len(s); j++ {
-			if s[j].Order < s[i].Order {
-				s[i], s[j] = s[j], s[i]
-			}
-		}
-	}
-}
+type sentences []sentence
 
-func NewSentence(txt string, o int, l *Language) (s *Sentence) {
-	var r string = strings.ToLower(txt)
-	var t []*Token = GetTokens(r, l)
-	var sc float64
+type byWeight []sentence
 
-	return &Sentence{txt, r, l, t, sc, o}
-}
+func (s byWeight) Len() int           { return len(s) }
+func (s byWeight) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s byWeight) Less(i, j int) bool { return s[i].weight > s[j].weight }
 
-func (s *Sentence) HasSimilarToken(t *Token) bool {
-	return t.IsSimilarIn(s.Tokens)
-}
+type byOrder []sentence
 
-func (s *Sentence) HasToken(t *Token) bool {
-	return t.IsIn(s.Tokens)
-}
-
-func SplitSentences (i string) (sentences []string) {
-	var numbersPattern *regexp.Regexp = regexp.MustCompile(`([0-9]+)\.([0-9]+)`)
-	var numbersNeedle string = `$1*|*$2`
-	var no_numbers string = numbersPattern.ReplaceAllString(i, numbersNeedle)
-
-	var stopsPattern *regexp.Regexp = regexp.MustCompile(`[^..][!?.]\s`)
-	var stopsNeedle string = `$0{stop}`
-	var noStops string = stopsPattern.ReplaceAllString(no_numbers, stopsNeedle)
-
-	var restorePattern *regexp.Regexp = regexp.MustCompile(`\*\|\*`)
-	var restoreNeedle = `.`
-	var text string = restorePattern.ReplaceAllString(noStops, restoreNeedle)
-
-	var spliter *regexp.Regexp = regexp.MustCompile(`{stop}`)
-	return spliter.Split(text, -1)
-}
+func (s byOrder) Len() int           { return len(s) }
+func (s byOrder) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s byOrder) Less(i, j int) bool { return s[i].order < s[j].order }
