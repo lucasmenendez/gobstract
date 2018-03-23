@@ -27,7 +27,7 @@ import (
 
 func main() {
     var input string
-    if raw, err := ioutil.ReadFile("demo/input"); err != nil {
+    if raw, err := ioutil.ReadFile("input"); err != nil {
         fmt.Println(err)
         return
     } else {
