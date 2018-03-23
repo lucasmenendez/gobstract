@@ -1,7 +1,18 @@
 # Gobstract
 Gobstract package make extraction summaries from text provided. The algorithm measures sentence relations (measuring relevant token similarity), position and length to pick the text highlights.
-## Demo
 
+## Installation
+### PoS Tagging
+For more information check instructions [here](https://github.com/lucasmenendez/gopostagger#train-corpus).
+
+### Abstracts
+```bash
+export MODELS="<postagging trained models folder path>"
+
+go get github.com/lucasmenendez/gobstact
+```
+
+## Demo
 ```go
 package main
 

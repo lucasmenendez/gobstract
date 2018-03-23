@@ -23,7 +23,7 @@ func (s sentence) isSimilar(s2 sentence) bool {
 		var d float64
 		var rate float64 = float64(len(t1)) / float64(len(s.tokens))
 		for _, t2 := range s2.tokens {
-			d += strSimilarity(t1, t2) * rate
+			d += strDistance(t1, t2) * rate
 		}
 
 		if d > tokenSimilarityThreshold {

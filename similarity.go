@@ -2,11 +2,11 @@ package gobstract
 
 const scalingFactor float64 = 0.1
 
-// jaroSimilarity functions implements Jaro String Similarity algorithm, that
+// jaroDistance functions implements Jaro String Similarity algorithm, that
 // determines how similar are two strings. Jaro Similarity returns value between
 // 0 and 1, that represents the distance between both strings. Check out here:
 // https://goo.gl/se7e3g
-func jaroSimilarity(t1, t2 string) (dj float64) {
+func jaroDistance(t1, t2 string) (d float64) {
 	if len(t1) == 0 || len(t2) == 0 {
 		return
 	} else if len(t2) < len(t1) {
@@ -37,15 +37,15 @@ func jaroSimilarity(t1, t2 string) (dj float64) {
 	}
 
 	t /= 2
-	dj = ((m / t1l) + (m / t2l) + (m-t)/m) / 3
+	d = ((m / t1l) + (m / t2l) + (m-t)/m) / 3
 	return
 }
 
-// jaroWinklerSimilarity function extends Jaro String Similarity algorithm,
+// jaroWinklerDistance function extends Jaro String Similarity algorithm,
 // measuring common strings prefixes. Check out here: https://goo.gl/6fvpAM
-func jaroWinklerSimilarity(t1, t2 string) (d float64) {
+func jaroWinklerDistance(t1, t2 string) (d float64) {
 	var dj float64
-	if dj = jaroSimilarity(t1, t2); dj == 0 {
+	if dj = jaroDistance(t1, t2); dj == 0 {
 		return
 	}
 
@@ -62,8 +62,8 @@ func jaroWinklerSimilarity(t1, t2 string) (d float64) {
 	return
 }
 
-// strSimilarity functions is the generic function to call across the code. The
-// functions call the chosen strings similarity algorithm.
-func strSimilarity(t1, t2 string) float64 {
-	return jaroWinklerSimilarity(t1, t2)
+// strDistance functions is the generic function to call across the code. The
+// functions call the chosen strings distance algorithm.
+func strDistance(t1, t2 string) float64 {
+	return jaroWinklerDistance(t1, t2)
 }
