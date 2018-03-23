@@ -101,20 +101,23 @@ func loadLanguage(c string) (l language, e error) {
 	)
 
 	l.code = c
-	if mPath != "" && sPath != "" {
-		var (
-			fm string = filepath.Join(mPath, c)
-			fs string = filepath.Join(sPath, c)
-		)
-
-		var fds *os.File
+	if mPath != "" {
+		var fm string = filepath.Join(mPath, c)
 		if _, e = os.Stat(fm); e != nil {
 			return
-		} else if fds, e = os.Open(fs); e != nil {
+		}
+		l.model = fm
+	}
+
+	if sPath != "" {
+		var (
+			fs  string = filepath.Join(sPath, c)
+			fds *os.File
+		)
+		if fds, e = os.Open(fs); e != nil {
 			return
 		}
 		defer fds.Close()
-		l.model = fm
 
 		var s *bufio.Scanner = bufio.NewScanner(fds)
 		s.Split(bufio.ScanLines)
@@ -128,7 +131,13 @@ func loadLanguage(c string) (l language, e error) {
 	} else {
 		var ok bool
 		if l.stopwords, ok = supported[c]; !ok {
-			e = errors.New("language not supported")
+			var supported []string
+			for _, code := range supported {
+				supported = append(supported, code)
+			}
+
+			var cs string = strings.Join(supported, ",")
+			e = errors.New("language not supported: " + cs)
 			return
 		}
 	}

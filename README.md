@@ -1,3 +1,6 @@
+[![GoDoc](https://godoc.org/github.com/lucasmenendez/gobstract?status.svg)](https://godoc.org/github.com/lucasmenendez/gobstract)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lucasmenendez/gobstract)](https://goreportcard.com/report/github.com/lucasmenendez/gobstract)
+
 # Gobstract
 Gobstract package make extraction summaries from text provided. The algorithm measures sentence relations (measuring relevant token similarity), position and length to pick the text highlights.
 
