@@ -15,7 +15,7 @@ export MODELS="<postagging trained models folder path>"
 go get github.com/lucasmenendez/gobstact
 ```
 
-## Demo
+### Use it
 ```go
 package main
 
