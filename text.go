@@ -68,7 +68,7 @@ func (t *Text) getTokens(s string) (r []string) {
 
 		var pts [][]string = tagger.Tag(ts)
 		for _, i := range pts {
-			var k, v string = i[1], i[0]
+			var k, v string = i[1], strings.ToLower(i[0])
 			if strings.Contains(k, nTag) || strings.Contains(k, aTag) {
 				tr = append(r, v)
 			}

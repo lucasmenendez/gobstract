@@ -136,7 +136,7 @@ func loadLanguage(c string) (l language, e error) {
 }
 
 // isStopword function check if provided string is contained into associated
-// language stopwords list. Previously transform string to lower case to prevent
+// language stopword list. Previously transform string to lower case to prevent
 // false negatives.
 func (l language) isStopword(s string) (is bool) {
 	var _s string = strings.ToLower(s)
