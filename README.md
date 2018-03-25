@@ -1,4 +1,5 @@
 [![GoDoc](https://godoc.org/github.com/lucasmenendez/gobstract?status.svg)](https://godoc.org/github.com/lucasmenendez/gobstract)
+[![Build Status](https://travis-ci.org/lucasmenendez/gobstract.svg?branch=master)](https://travis-ci.org/lucasmenendez/gobstract)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lucasmenendez/gobstract)](https://goreportcard.com/report/github.com/lucasmenendez/gobstract)
 
 # Gobstract
