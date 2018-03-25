@@ -9,14 +9,15 @@ const summaryPercent float64 = 0.22
 // string extraction summary.
 type scorer struct {
 	phrases sentences
+	length  float64
 	limit   int
 }
 
 // newScorer function initializes a scorer struct calculating limit according to
 // set of sentences provided.
 func newScorer(ps sentences) *scorer {
-	var s scorer = scorer{ps, minSummary}
-	if limit := int(float64(len(ps)) * summaryPercent); limit > minSummary {
+	var s scorer = scorer{ps, float64(len(ps)), minSummary}
+	if limit := int(s.length * summaryPercent); limit > minSummary {
 		s.limit = limit
 	}
 	return &s
@@ -36,18 +37,19 @@ func (s *scorer) calcRelations() {
 	}
 }
 
-// calcLength function fits each sentence weight according to its length. Longer
-// sentences usually contains relevant/complete information or explanations.
+// calcLength function fits each sentence weight according to its lengthRaw.
+// Longer sentences usually contains relevant/complete information or
+// explanations.
 func (s *scorer) calcLength() {
 	var total float64
 	for _, p := range s.phrases {
-		total += p.length
+		total += p.lengthRaw
 	}
 
-	var limit float64 = total / float64(len(s.phrases))
+	var limit float64 = total / s.length
 	for i, p := range s.phrases {
-		if p.length >= limit {
-			s.phrases[i].weight *= p.length / limit
+		if p.lengthRaw >= limit {
+			s.phrases[i].weight *= p.lengthRaw / limit
 		}
 	}
 }
@@ -58,17 +60,17 @@ func (s *scorer) calcLength() {
 // topic introductions or conclusions.
 func (s *scorer) calcPosition() {
 	var (
-		min   int     = len(s.phrases) / 10
+		min   int     = len(s.phrases) / 10 + 2
 		max   int     = len(s.phrases) - min
 		limit float64 = float64(s.limit)
 	)
 
 	for i, p := range s.phrases {
-		if p.order < min {
-			s.phrases[i].weight += p.length * (float64(min-p.order) / limit)
+		if p.order <= min {
+			s.phrases[i].weight *= 1 + (float64(min - p.order + 1) / limit)
 		} else if p.order > max {
 			var porder int = len(s.phrases) - p.order
-			s.phrases[i].weight += p.length * (float64(min-porder) / limit)
+			s.phrases[i].weight *= 1 + (float64(min - porder) / limit)
 		}
 	}
 }
@@ -77,7 +79,7 @@ func (s *scorer) calcPosition() {
 // the text. Function chooses sentences until the determined limit sorting by
 // calculated weight and store into a sentences subset. Then return that subset
 // sorted by original order into the text.
-func (s *scorer) getSummary() (r []string) {
+func (s *scorer) getSummary() (r sentences) {
 	s.calcRelations()
 	s.calcLength()
 	s.calcPosition()
@@ -85,11 +87,8 @@ func (s *scorer) getSummary() (r []string) {
 	var ps sentences = s.phrases
 	sort.Sort(byWeight(ps))
 
-	var rs sentences = ps[:s.limit]
-	sort.Sort(byOrder(rs))
+	r = ps[:s.limit]
+	sort.Sort(byOrder(r))
 
-	for _, p := range rs {
-		r = append(r, p.raw)
-	}
 	return
 }

@@ -22,7 +22,7 @@ type Text struct {
 }
 
 // NewText function initializes Text struct splitting sentences, checking text
-// length and loading the according language.
+// lengthRaw and loading the according language.
 func NewText(i, c string) (*Text, error) {
 	var t Text
 	if len(i) < minSummarized {
@@ -39,14 +39,16 @@ func NewText(i, c string) (*Text, error) {
 }
 
 // buildSentences function splits text sentences and initializes sentence
-// structs measuring its length and order into the full text.
+// structs measuring its lengthRaw and order into the full text.
 func (t *Text) buildSentences(i string) {
 	for o, rs := range gotokenizer.Sentences(i) {
+		var tokens []string = t.getTokens(rs)
 		var s sentence = sentence{
-			tokens: t.getTokens(rs),
-			raw:    rs,
-			length: float64(len(rs)),
-			order:  o + 1,
+			raw:          rs,
+			lengthRaw:    float64(len(rs)),
+			tokens:       tokens,
+			lengthTokens: float64(len(tokens)),
+			order:        o + 1,
 		}
 
 		if len(s.raw) > 0 {
@@ -85,7 +87,11 @@ func (t *Text) getTokens(s string) (r []string) {
 }
 
 // Summarize function initializes a Scorer and return scoring process result.
-func (t *Text) Summarize() []string {
+func (t *Text) Summarize() (summary []string) {
 	var scorer *scorer = newScorer(t.sentences)
-	return scorer.getSummary()
+	for _, s := range scorer.getSummary() {
+		summary = append(summary, s.raw)
+	}
+
+	return
 }

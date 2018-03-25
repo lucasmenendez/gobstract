@@ -4,9 +4,9 @@ import "testing"
 
 func TestIsSimilar(t *testing.T) {
 	var ss sentences = sentences{
-		{ tokens: []string{ "first-token", "second-token" } },
-		{ tokens: []string{ "first-token", "second-token", "third-token" } },
-		{ tokens: []string{ "xxx", "cccc", "zzzz" } },
+		{tokens: []string{"st-token", "nd-token"}, lengthTokens: 2},
+		{tokens: []string{"st-token", "nd-token", "rd-token"}, lengthTokens: 3},
+		{tokens: []string{"xxx", "cccc", "zzzz"}, lengthTokens: 2},
 	}
 
 	if !ss[0].isSimilar(ss[1]) {

@@ -3,14 +3,16 @@ package gobstract
 const tokenSimilarityThreshold float64 = 0.55
 const sentenceSimilarityThreshold float64 = 0.7
 
-// sentence struct evolves sentence data such as relevant tokens, raw content
-// origin length, order into the text importance weight.
+// sentence struct evolves sentence data such as relevant tokens, raw content,
+// sentence order and weight into the text. Also stores tokens length and raw
+// content length in float64 to use them across the algorithm.
 type sentence struct {
-	tokens []string
-	raw    string
-	weight float64
-	length float64
-	order  int
+	raw          string
+	lengthRaw    float64
+	tokens       []string
+	lengthTokens float64
+	weight       float64
+	order        int
 }
 
 // isSimilar function determine if provided sentence is similar to referenced
@@ -25,12 +27,12 @@ func (s sentence) isSimilar(s2 sentence) bool {
 			d += strDistance(t1, t2)
 		}
 
-		if d /= float64(len(s2.tokens)); d > tokenSimilarityThreshold {
+		if d /= s2.lengthTokens; d > tokenSimilarityThreshold {
 			c++
 		}
 	}
 
-	return c/float64(len(s.tokens)) > sentenceSimilarityThreshold
+	return c/s.lengthTokens > sentenceSimilarityThreshold
 }
 
 type sentences []sentence
