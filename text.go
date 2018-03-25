@@ -23,18 +23,18 @@ type Text struct {
 
 // NewText function initializes Text struct splitting sentences, checking text
 // lengthRaw and loading the according language.
-func NewText(i, c string) (*Text, error) {
+func NewText(input, langCode string) (*Text, error) {
 	var t Text
-	if len(i) < minSummarized {
+	if len(input) < minSummarized {
 		return &t, errors.New("input text too short")
 	}
 
 	var e error
-	if t.lang, e = loadLanguage(c); e != nil {
+	if t.lang, e = loadLanguage(langCode); e != nil {
 		return &t, e
 	}
 
-	t.buildSentences(i)
+	t.buildSentences(input)
 	return &t, nil
 }
 
