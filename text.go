@@ -1,6 +1,6 @@
-// Gobstract package make extraction summaries from text provided. The algorithm
-// measures sentence relations, position and similarity to pick the most
-// important text sentences.
+// Package gobstract package make extraction summaries from text provided. The
+// algorithm measures sentence relations, position and similarity to pick the
+// most important text sentences.
 package gobstract
 
 import (

@@ -60,17 +60,17 @@ func (s *scorer) calcLength() {
 // topic introductions or conclusions.
 func (s *scorer) calcPosition() {
 	var (
-		min   int     = len(s.phrases) / 10 + 2
+		min   int     = len(s.phrases)/10 + 2
 		max   int     = len(s.phrases) - min
 		limit float64 = float64(s.limit)
 	)
 
 	for i, p := range s.phrases {
 		if p.order <= min {
-			s.phrases[i].weight *= 1 + (float64(min - p.order + 1) / limit)
+			s.phrases[i].weight *= 1 + (float64(min-p.order+1) / limit)
 		} else if p.order > max {
 			var porder int = len(s.phrases) - p.order
-			s.phrases[i].weight *= 1 + (float64(min - porder) / limit)
+			s.phrases[i].weight *= 1 + (float64(min-porder) / limit)
 		}
 	}
 }
